@@ -1,0 +1,49 @@
+---
+title: "Supervised Machine Learning HW 2"
+author: "Group 3: Maja Nordfeldt, Jakob Rauch, Timo Schenk, Konstantin Sommer"
+date: "16-1-2020"
+output:
+  pdf_document:
+      fig_caption: yes
+  html_notebook: default
+---
+
+# Introduction
+
+
+# Data 
+
+
+```{r chunk1, echo=FALSE}
+# Copy code chunks that create table output in here
+load("./")
+library(pander)
+pander(t(desc), caption = 'Summary statistics')
+```
+
+```{r chunk2, echo=FALSE, fig.cap="\\label{fig:figs}Figure caption"}
+# Copy code chunks that create figure output in here
+plot(fitted(result), resid(result), ylab="Residuals", xlab="Fitted values")
+```
+
+# Methods
+Since we are dealing with a dataset with about 45 variables and only 77 observations we use a methodology that is aimed at reducing the number of explanatory variables. This is because a situation in which the ratio of observations to predictor variables is low there is a danger of what is called "overfitting". In such a situation we might be able to find unbiased estimates of a coefficient for each of the variables using the standard multiple regression framework but since there is only so few observations available per parameter, the model will do very poorly in predicting observations that are out of sample. We therefore abstract from the multiple regression framework and use a combination of Ridge and Lasso regressions. Both of these methods, as well as their combination, are aimed at driving some of the coefficients towards zero such that they are not used in prediction anymore. In order to do so we extend the loss function, which in OLS is only the residuals sum of square, by a penalty term, that increases with the size of the coefficients. So when minimizing the loss function one can also think about the penalty term as a constraint on the size of the coefficients. Since both of these methods have advantages and disadvantages, which we will describe in the following, we use a combination of the two, the elastic net method.\\
+The loss function of the Ridge regression now becomes $(y-X\beta)^T(y- X\beta) + \lambda \beta^T\beta$. The first term of this are the residuals sum of squares, so the loss function of the multiple regression setting. As one can see we are here not only interested in minimizing this but in addition we also add the penalty term $\lambda \beta^T\beta$, where $\lambda$ is the penalty strength. One can see that the larger the chosen value of $\lambda$ the lower will be the optimal coefficients. The penalty term increases here quadratically in $\beta$, which is the key difference to the LASSO method in which the penalty term is $\lambda ||\beta||_1$, where $||\beta||_1$ refers to the L1 norm so the sum of the absolute values of the vector. So the penalty term in LASSO increases with the absolute value of the coefficients and one can again state that the larger the chsoen penalty term the smaller will be the resulting coefficient values. \\
+The main difference between the two penalty terms is that while Ridge drives the coefficient values close to zero but mostly not exactly to zero, LASSO will assign an exact zero to many of the coefficients. Why this is the case becomes a bit clearer when looking at how the penalty term translate into a constraint on minimizing the RSS. While for Ridge this is $\beta^T\beta<\gamma$, for LASSO this is $||\beta||_1<\gamma$. Both of these constraints are equivalent to minimizing the respective loss function and both span a space around the origin in which the the optimal coefficient values must be. While in Ridge this is a hyperbole, in LASSO this is a space with straight edges. One can see that when analysing the two dimensional case that it is mostly the case that for LASSo one of the coefficients will be zero and the other one will be relatively large, for Ridge, both coefficients are driven towards zero but not to exactly zero.\\
+Driving some of the coefficients exactly to zero has the advantage that is basically translates into a variable selection exercise, since these coefficients will then not be used in prediction anymore. On the other hand LASSO might also drive coefficients towards zero that are actually not zero and that are then excluded eventhough they might actually explain some of the variation of the endogenous variable. So to use the advantages of both methods we will combine the two in an elastic net approach in which the penalty term is set up as a combination of the two previous ones: $\lambda(\alpha ||\beta||_1 +(1-\alpha\beta^T\beta)$, where $\lambda$ still determines the penalty strength and $\alpha$ determines the importance of the LASSO penalty over the Ridge penalty.\\
+All of these methods give biased estimates for the coefficients but the resulting coefficients exhibit smaller variances and can in the case of overfitting outperform a multiple regression estimation in predicting out of sample values. One therfore faces what is known as a bias variance trade of, determined by the penalty strength $\lambda$ or $\gamma$. The size of this parameter can then be determined in a K-fold method. In this procedure, we divide our dataset into K bins, that are called folds
+
+# Results 
+
+
+# Conclusion
+
+
+# References
+
+# Code
+```{r chunk1, eval=FALSE}
+# This prints the code chunks at the end
+```
+```{r chunk2, eval=FALSE}
+```
