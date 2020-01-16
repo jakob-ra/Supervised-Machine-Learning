@@ -25,13 +25,18 @@ y = GROCERY_sum
 # Create matrix X of predictor variables
 X = subset(df, select = -GROCERY_sum)
 
-# Standardize predictor variables
+# Standardize variables
 X = scale(X)
+y = scale(y)
 
 # GLMNET
 library(glmnet, quietly = TRUE)
-result = glmnet(X, y, alpha = 1, lambda = 10^seq(-2, 6, length.out = 5),
+result = glmnet(X, y, alpha = 0.5, lambda = 10^seq(-2, 6, length.out = 5),
                  standardize = FALSE)
+
+result.cv <- cv.glmnet(X, y, alpha = 0.5,
+                       lambda = 10^seq(-2, 10, length.out = 50), nfolds = 10)
+print(result.cv$lambda.min) # Best cross validated lambda
 
 library(plotrix)
 plot(result, xvar = "lambda", label = TRUE, las = 1)
@@ -87,10 +92,26 @@ p = length(X[1,]) # Number of parameters
 beta_0 = rep(0,p) # Initialize with beta_0 a vetor of 0s
 
 alpha = 0.5
-lambda = 0.0000001
+lambda = 0.05428675
 elastic_net_MM(y,X,alpha,lambda,beta_0)
 
-# epsilon = 10^(-8)
-# beta = beta_0
-# dim(loss(y,X,alpha,lambda,beta,epsilon)[[2]])
-# dim(X)
+# Function for k-fold crossvalidation
+elastic_net_MM = function(y,X,k){
+  # Tunes hyperparameters alpha and lambda via k-fold crossvalidation. Returns optimal alpha and lambda
+  lambda_values = 10^seq(-2, 5, length.out = 50)
+  alpha_values = seq(0, 1, length.out = 10)
+  
+  n = length(y) # Number of observations
+  reshuffled_indices = sample(seq(1,n,1), n, replace=FALSE) # Shuffle indices
+  n_test = round(n/k) # if n=77 and k=10 we will have 8 obs. in the test set 
+  n_train = n-n_test
+  for (i in seq(1,k-1,1)){
+    # Divide data into test and training
+    y_test = y[c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
+    y_train = y[-c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
+    X_test = X[c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)]),]
+    X_train = X[-c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)]),]
+    # 
+  }
+
+  }
