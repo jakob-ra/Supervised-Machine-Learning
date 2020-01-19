@@ -12,11 +12,17 @@ output:
 
 
 # Data 
+The data is store-level scanner data collected at 77 supermarkets in the Chicago area during 1996, in a collaboration between Chicago Booth School of Business and Dominick’s Finer Foods^[The dataset be retrieved from https://www.chicagobooth.edu/research/kilts/datasets/dominicks]. Store data is matched with demographic census data of the metropolitan Chicago area, originally obtained the US Government in 1990. 
+
+The dependent variable *grocery_sum* is the total turnover in one year of groceries, measured in $. The predictor variables present the demographics of the respective stores nearby area - *age9* and *age60* represent the percent of population under age 9 and 60 respectively. *ethic* presents percent of blacks and hispanics, *nwhite* indicates percent of population that is non-white, *educ* percent of college graduates, *nocar* percent with no vehicles, *income* the log of the median income, *poverty* indivates percent of population with income below $15,000, *incsigma* the approximated standard deviation of the income distribution, *hsizeavg* the average household size, *hsizex* and *hhxplus* variables denote percent of households containing x persons, *hhsingle* measures percentage of detached houses, *hhlarge* the percentage with 5 or more people, *workwom* percentage of working women with full time jobs, *sinhouse* the percentage of one-person households, *density* the trading area in square miles per capita, *hvalx* the percent of households with value over x thousands of dollars, *hvalmean* the approximated mean household value, *single* the percentage of singles*, *retired* the percentage of retired and *unemp* the percentage of unemployed. *wrk* variables denotes percent of women working, with a *ch* ending denoting having children, *nch* no children and *nwrk* not working, and the number indicating age of children (5 means children younger than 5 years old and 17 means children are between 6 - 17 years old). *telephn* and *mortgage* indicates percent of households having a telephone and mortgage respectively. Further, *shopx* denotes percent of type x of shopper - including constrained, hurried, avid, unfetters, birds and stranges. Finally, *shopindx and *shpinx* present ability to shop, meaning having a car and being a single family house. 
+
+Note that from the original dataset we transform all variables to z-scores, removing their unit of measure. After this transformation, each variables value can be interpreted as standard deviations from its mean. This was undertaken to avoid the original magnitude of the variables influences their estimates.
 
 
 ```{r, echo=FALSE}
 # Copy code chunks that create table output in here
-library(pander)
+if (!require("pander")){install.packages("pander");library("pander")}
+if (!require("glmnet")){install.packages("glmnet");library("glmnet")}
 pander(summary(0), caption = 'Summary statistics')
 ```
 
@@ -41,7 +47,12 @@ Using the elastic net method, we need to decide for values of the two hyperparam
 # Results
 Choose $k=7$ to get equally large bins for 77 observations. Very close results glmnet() and our manual function when we specify k=7 for glmnet() - though the estimates are not exactly the same, as both glmnet() and our manual function have non-deterministic results because data is randomly rearranged. Best values are $\alpha=0.6$ and $\lambda=0.04$ for a grid search with $\alpha$ ranging between 0 and 1, with stepsize 0.1, and $\lambda$ ranging between 0.01 and 1 with stepsize 0.01.
 
+ ///////// ADD TABLE / beta hat values /////////
+
 # Conclusion
+In this study we aimed to identify what demographics that are linked to higher store turnovers. XXX[ALTER TO RQ formulation] sales. Using an elastic-net strategy, we identified a few key predictors. 
+
+Firstly, it appears that the household size is relevant - in particular single and three to four-person households have explanatory power. Even more important appears the share of high-income household values to be, in particular a household value over 150 000 dollar. The return on targeting a neighbourhood with a higher share of value over 200 000 dollar is however not as large. Somewhat contradictory to the income predictors is the share of unemployed, being the single highest predictor. Finally, hurried shoppers appear to be a profitable group to target. For future stores, planner might want to pay extra attention to candidate neighbourhoods employment, income and household size demographics.  
 
 
 # References
