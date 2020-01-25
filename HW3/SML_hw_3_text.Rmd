@@ -1,0 +1,73 @@
+---
+title: "Supervised Machine Learning HW 3"
+author: "Group 3: Maja Nordfeldt, Jakob Rauch, Timo Schenk, Konstantin Sommer"
+date: "25-1-2020"
+output:
+  pdf_document:
+      fig_caption: yes
+  html_notebook: default
+---
+
+# Introduction
+Can we predict an airline's revenue passenger miles (RPM) in a given year using fuel price and airline characteristics? RPM indicates how many miles an airline transports its paying customers and is a widely used output measure in the aviation industry. For airlines' financial and stratgic planning, the prediction problem is therefore of obvious importance. 
+
+However, the problem presents a number of practical challenges: First, we only have a very limited set of predictors available. To complicate things, there might be two-way or even three-way interactions between the predictor variables that significantly affect output. Finally, there might be important nonlinearities in the relation between our predictors and output: For instance, when fuel prices rise above a certain threshold the airline might find that servicing some market segments has become entirely unprofitable and therefore reduce its operations. Then the effect of fuel price on RPM is limited for low fuel prices but large for already high fuel prices.
+
+To deal with these problems, we use the method of kernel ridge regression (KRR). In the following, we will give an overview of our data, explain our method and modeling choices in detail, and discuss our results.
+
+# Data 
+
+We have a balanced panel of six airlines spanning the years 1970 to 1984. The data was originally used by Greene et al. (1997) and is supplied with the R package Ecdat. The panel contains 4 variables: fuel price, total costs of the airline in 1,000$, load factor (the average capacity utilization of the fleet) and output in RPM (as already explained). All of these variables are specific to a given airline. This seems to be true even for the variable fuel price, perhaps indicating that airlines get different fuel prices as a result of quanity discounts. We are only speculating,however, as we do not have a detailed description of this variable. 
+
+Table 1 gives an overview of the differences between airlines. As we can see, the airlines vary wildly in size, with airline 1 having more than ten times the output of airline 2. All airlines do seem to pay roughly the same price for fuel, although the bigger airlines seem to benefit from a small quantity discount. Bigger airlines also seem to do better in terms of load, i.e. utilizing their fleet to the fullest. This relation, however, does not hold in every case.
+
+```{r,echo=F, message=F}
+# Clear cache
+rm(list = ls())
+
+# Load packages
+library(dsmle)
+library(plyr)
+library(pander)
+
+# Load supermarket data from github
+githubURL = "https://github.com/jakob-ra/Supervised-Machine-Learning/raw/master/HW3/Airline.RData"
+load(url(githubURL))
+attach(Airline)
+
+# Descriptive statistics
+pander(ddply(Airline, .(airline), summarize,  Cost=mean(cost), Output=mean(output), Fuel_Price=mean(pf), Load_Factor=mean(lf)),
+       caption = "Airline averages over all years")
+```
+
+Table 2 gives an overview of the time trends across all airlines. Clearly, output has grown a lot over the 15 years, with only a short interruption around 1980. Costs have grown even stronger, although this might be due to inflation Again, we do not know for lack of a detailed variable description, but if the costs are really not inflation adjusted this is a limitation of the data. Fuel prices, on the other hand, have fallen a lot over the years, indicating perhaps the recovery from the oil crisis. Finally, the airlines seem to have improved their efficiency over the years and have a 10% higher load factor at the end of the sample period.
+
+```{r,echo=F, message=F}
+pander(ddply(Airline, .(year), summarize,  Cost=mean(cost), Output=mean(output), Fuel_Price=mean(pf), Load_Factor=mean(lf)),
+       caption = "Yearly averages over all airlines")
+```
+
+Note that from the original dataset we transform all variables to z-scores, removing their unit of measure. After this transformation, each variables value can be interpreted as standard deviations from its mean. The importance of this will be explained in the next section.
+
+
+
+
+# Methods
+
+
+# Results
+
+
+```{r,include=FALSE, fig.cap="\\label{fig:figs}Figure caption"}
+```
+
+
+# Conclusion & Discussion
+
+
+# References
+Greene, William. "Frontier production functions, M. Hashem Pesaran and Peter Schmidt (eds.): Handbook of Applied Econometrics, vol. II." (1997): 81-166.
+
+# Code
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
