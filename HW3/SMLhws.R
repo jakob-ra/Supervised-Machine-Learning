@@ -17,7 +17,7 @@ est.qtilde.gauss = function(y,K,lambda){
   #         multiplied by K^-1
   
   n = dim(K)[1]
-  Kinvq = solve(K+lambda*diag(n))%*%y
+  Kinvq = solve(K+lambda*diag(n))%*%(y-mean(y))
  
   return(Kinvq)
 }
@@ -42,7 +42,7 @@ av.rmsfe = function(y,X,fold,gamma,d,lambda){
     Kall = phi.gaussian(X,gamma)
     Ktrain = Kall[train,train]
     Ku = Kall[!train,train]
-    qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain-mean(ytrain),Ktrain,lambda)
+    qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain,Ktrain,lambda)
     # qall[!train] = qnew
     RMSFE.gauss = RMSFE.gauss + 1/k*mean((ytest-qnew)^2)
     
@@ -56,15 +56,7 @@ av.rmsfe = function(y,X,fold,gamma,d,lambda){
     
   }
   
-  # # plot
-  #  mycol = rainbow(k)
-  #  idx = order(X[,2])
-  #  plot(X[,2],y)
-  #  points(X[idx,2],qall[idx],pch=16,col='blue')
-  
-  
-  # cat("RMSFE for lambda =",lambda,': ',RMSFE)
-  return(sqrt(c(RMSFE.gauss,RMSFE.poly)))
+    return(sqrt(c(RMSFE.gauss,RMSFE.poly)))
 }
 
 
@@ -101,7 +93,7 @@ y = scale(y)
 p = dim(X)[2] # Nr of predictors
 k = 9 # Nr of folds
 
-lambdagrid = 10^seq(-8, 0, length.out = 100) # values to try for lambda
+lambdagrid = 10^seq(-8, 8, length.out = 200) # values to try for lambda
 gamma = 1/p # fix gamma at 1/p
 d=2 # fix d at 2
 
@@ -135,14 +127,19 @@ par(op)
 
 # Compare manual to package for RBF
 ker.cv.rbf = cv.krr(as.vector(y), X, k.folds = 9, lambda = lambdagrid,
-                center = F, scale = F, kernel.type = "RBF", kernel.RBF.sigma = 1/2*p)
+                center = F, scale = F, kernel.type = "RBF", kernel.RBF.sigma = 1)
 ker.cv.poly = cv.krr(as.vector(y), X, k.folds = 9, lambda =  lambdagrid,
                     center = F, scale = F, kernel.type = "nonhompolynom", kernel.degree = 2)
 
 
 op = par(mfrow = c(1, 2))
-plot(ker.cv.rbf, ylim = c(0, 2), las = 1)
-plot(ker.cv.poly, ylim = c(0, 2), las = 1)
+plot(ker.cv.rbf$lambda,ker.cv.rbf$rmse,type='l', log='x', main = 'Gaussian kernel',
+     ylim = c(0, 1), las = 1,xlab="Lambda", ylab="RMSE")
+abline(v=ker.cv.rbf$lambda.min, col="purple")
+
+plot(ker.cv.poly$lambda,ker.cv.poly$rmse, type='l', log='x', main = 'Inhom. polynomial kernel',
+     ylim = c(0, 1), las = 1, xlab="Lambda", ylab="RMSE")
+abline(v=ker.cv.poly$lambda.min, col="purple")
 par(op)
 
 
