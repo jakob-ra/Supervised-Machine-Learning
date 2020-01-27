@@ -233,8 +233,7 @@ In this paper we wanted to investigate how well we could predict an airline's re
 
 However, the analysis is sensitive to the decisions we have made - we use two particular kernels because of their inherent benefits, but it is not clear how to optimally select a kernel and by our choice we introduce a functional form preference. We tune one of our hyperparameters and choose the other, meaning there is as a risk of suboptimal results. 
 
-Although we achieve predictions, we are in this analysis not distinguishing between what predictors are important, their relative importance and the direction of that importance. Therefore, we cannot make any statements about the distinct explanatory factors. Nevertheless, predictions can still be of use to planners in the aviation industry for their prospective business decisions. It may also be of interest to policy makers, as an increased taxation on fuel would likely influence airlines profitability and this could be a way to understand how businesses would react.
-
+Although we achieve predictions, we are in this analysis not distinguishing between what predictors are important, their relative importance and the direction of that importance. Therefore, we cannot make any statements about the distinct explanatory factors. Nevertheless, predictions can still be of use to planners in the aviation industry for their prospective business decisions. It may also be of interest to policy makers, as an increased taxation on fuel would likely influence airlines profitability and this could be a way to understand how businesses would react. It should be noted however that the data is decades old, and it is not certain predictions would be accurate in todays world. Future research could look into the results of other predictors, other type of kernels, optimizing over more parameters then in this study and employ newer data. 
 
 
 # References
