@@ -22,6 +22,12 @@ We have a balanced panel of six airlines spanning the years 1970 to 1984. The da
 Table 1 gives an overview of the differences between airlines. As we can see, the airlines vary wildly in size, with airline 1 having more than ten times the output of airline 2. All airlines do seem to pay roughly the same price for fuel, although the bigger airlines seem to benefit from a small quantity discount. Bigger airlines also seem to do better in terms of load, i.e. utilizing their fleet to the fullest. This relation, however, does not hold in every case.
 
 ```{r,echo=F, message=F}
+# *------------------------------------------------------------------
+# | PROGRAM NAME: Supervised Machine Learning - HW 3
+# | DATE: 23-1-2020
+# | CREATED BY: Jakob Rauch
+# *----------------------------------------------------------------
+
 # Clear cache
 rm(list = ls())
 
@@ -30,10 +36,109 @@ library(dsmle)
 library(plyr)
 library(pander)
 
+est.qtilde.gauss = function(y,K,lambda){
+  # input: nx1 vector y (mean zero), nxn kernel matrix (K), 
+  #         tuning parameter lambda
+  # return: Kinvq, nx1 vector of in sample predictions minimizing kernel rifge regression loss
+  #         multiplied by K^-1
+  
+  n = dim(K)[1]
+  Kinvq = solve(K+lambda*diag(n))%*%(y-mean(y))
+ 
+  return(Kinvq)
+}
+
+
+av.rmsfe = function(y,X,fold,gamma,d,lambda){
+  # returns average RMSFE for a given lambda over k bins, for both kernels
+  n = dim(X)[1] # nr of observations
+  k = max(fold) # nr of bins
+  
+  # qall.gauss = rep(NA,n) # store out of sample predictions for plot
+  RMSFE.gauss = 0
+  RMSFE.poly = 0
+  
+  for (i in 1:k){
+    # split the data
+    train = (fold!=i)  # indicator training data
+    ytrain = y[train]
+    ytest = y[!train]
+    
+    # gaussian kernel: 
+    Kall = phi.gaussian(X,gamma)
+    Ktrain = Kall[train,train]
+    Ku = Kall[!train,train]
+    qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain,Ktrain,lambda)
+    # qall[!train] = qnew
+    RMSFE.gauss = RMSFE.gauss + 1/k*mean((ytest-qnew)^2)
+    
+    # inhom. polynomial kernel: 
+    Kall = K_IHP(X,d)
+    Ktrain = Kall[train,train]
+    Ku = Kall[!train,train]
+    qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain-mean(ytrain),Ktrain,lambda)
+    # qall[!train] = qnew
+    RMSFE.poly = RMSFE.poly + 1/k*mean((ytest-qnew)^2)
+    
+  }
+  
+    return(sqrt(c(RMSFE.gauss,RMSFE.poly)))
+}
+
+
+
+cvalkrr.lambda = function(y,X,fold,gamma,d,lambdagrid){
+  # returns RMSFE for a grid of lambdas by k fold cross validation
+  
+  RMSFE = matrix(NA,length(lambdagrid),2) # initialize grid of average RMSFE for each lambda
+  
+  for (l in 1:length(lambdagrid)) RMSFE[l,] = av.rmsfe(y,X,fold,gamma,d,lambdagrid[l])
+  
+  return(RMSFE)
+}
+
+## gaussian kernel 
+phi.gaussian = function(X,gamma) exp(-gamma*as.matrix(dist(X)^2)) 
+
+## inhomogeneous polynomial kernel  
+K_IHP = function(X,d) (1+X%*%t(X))^d
+
+
 # Load supermarket data from github
 githubURL = "https://github.com/jakob-ra/Supervised-Machine-Learning/raw/master/HW3/Airline.RData"
 load(url(githubURL))
 attach(Airline)
+
+y = output
+X = model.matrix(~ -1 + factor(airline) + year + cost + pf + lf)[,-1] # gets the X matrix with 5 airline dummies
+
+# Rescale
+X = scale(X)
+y = scale(y)
+
+p = dim(X)[2] # Nr of predictors
+k = 9 # Nr of folds
+
+lambdagrid = 10^seq(-8, 8, length.out = 200) # values to try for lambda
+gamma = 1/p # fix gamma at 1/p
+d=2 # fix d at 2
+
+
+
+# assign data randomly to one of the k bins 
+n = length(y)
+ntest = floor(n/k) # observations per bin
+rank = rank(rnorm(n))
+fold = rep(1:k,each = ntest) 
+fold = fold[rank] # vector of assigned bin
+
+RMSFE = cvalkrr.lambda(y,X,fold,gamma,d,lambdagrid) # matrix of RMSFE for different lambda
+
+min_index = which.min(RMSFE[,1]) # Find index of lowest RMSE
+lambda_min_gaussian = lambdagrid[min_index] # lambda value at lowest RMSE
+
+min_index = which.min(RMSFE[,2]) # Find index of lowest RMSE
+lambda_min_poly = lambdagrid[min_index] # lambda value at lowest RMSE
 
 # Descriptive statistics
 pander(ddply(Airline, .(airline), summarize,  Cost=mean(cost), Output=mean(output), Fuel_Price=mean(pf), Load_Factor=mean(lf)),
@@ -48,8 +153,6 @@ pander(ddply(Airline, .(year), summarize,  Cost=mean(cost), Output=mean(output),
 ```
 
 Note that from the original dataset we transform all variables to z-scores, removing their unit of measure. After this transformation, each variables value can be interpreted as standard deviations from its mean. The importance of this will be explained in the next section. Additionally we will transform the panel data set to a cross sectional one, by transforming all categorical variables, airline and year, into dummys. Such that we have one dummy per airline and one per year. Their coefficients could in an OLS context be interpreted as fixed effects.
-
-
 
 
 # Methods
@@ -74,22 +177,63 @@ The penalty term $\lambda$ will be determined in a k-fold cross validation toget
 
 
 # Results
+Figure 1 shows the results from our own 9-fold crossvalidation of $\lambda$. Due to the random reshuffling of our data, the optimal $\lambda$ varies. For the Gaussian kernel with fixed value of $\gamma=\frac{1}{p}$, with $p$ the number of predictorsis, $\lambda$ is usually around 0.0003. For the inhomogenous polynomial kernel, the optimal $\lambda$ is 0.05. For both kernels the resulting RMSE is around 0.05, which we can interpret as an $R^2$ of 0.95 since all our data (including y) is standardized.
 
-![Results from 9-fold cross validation](/Users/Maja/Documents/GitHub/Supervised-Machine-Learning/HW3/manual_rmse.png)
+```{r,echo=F, message=F, fig.cap="\\label{fig:figs}Results from manual 9-fold cross validation"}
+# Plot lambda vs RMSE
+op = par(mfrow = c(1, 2))
+plot(lambdagrid,RMSFE[,1],type='l', log='x', main = 'Gaussian kernel',
+     xlab="Lambda", ylab="RMSE")
+abline(v=lambda_min_gaussian, col="purple")
+plot(lambdagrid,RMSFE[,2],type='l', log='x', main = 'Inhom. polynomial kernel',  xlab="Lambda", ylab="RMSE") 
+abline(v=lambda_min_poly, col="purple")
+par(op)
+```
+
+Figure 2 shows the results from the DMSLE package. As we can see, the optimal $\lambda$ values are roughly the same. However, the values and pattern in RMSE are different in the package. We have not been able to find what causes this, there seems to be some issue with the scale of our RMSE, considering that we still get the same optimal value. 
+
+```{r,echo=F, message=F, fig.lp="fig:", fig.cap = 'Results from package 9-fold cross validation'}
+# Compare manual to package for RBF
+ker.cv.rbf = cv.krr(as.vector(y), X, k.folds = 9, lambda = lambdagrid,
+                center = F, scale = F, kernel.type = "RBF", kernel.RBF.sigma = 1)
+ker.cv.poly = cv.krr(as.vector(y), X, k.folds = 9, lambda =  lambdagrid,
+                    center = F, scale = F, kernel.type = "nonhompolynom", kernel.degree = 2)
+
+
+op = par(mfrow = c(1, 2))
+plot(ker.cv.rbf$lambda,ker.cv.rbf$rmse,type='l', log='x', main = 'Gaussian kernel',
+     ylim = c(0, 1), las = 1,xlab="Lambda", ylab="RMSE")
+abline(v=ker.cv.rbf$lambda.min, col="purple")
+
+plot(ker.cv.poly$lambda,ker.cv.poly$rmse, type='l', log='x', main = 'Inhom. polynomial kernel',
+     ylim = c(0, 1), las = 1, xlab="Lambda", ylab="RMSE")
+abline(v=ker.cv.poly$lambda.min, col="purple")
+par(op)
+```
+
+Following the KRR method, we do not get a vector of weights or point estimates indicating which variables have important effects. We can merely make statements about predictive performance, which is very good. 
+
+```{r,include=F, message=F, fig.cap="\\label{fig:figs}"}
+# Compare optimal lambda, manual vs package
+cat('The optimal lambda for the gaussian kernel is', 
+    lambda_min_gaussian,
+    'according to our manual function and', ker.cv.rbf$lambda.min, 'according to the cv.krr function. The resulting RMSE are',
+    min(RMSFE[,1]), 'and',  min(ker.cv.rbf$rmse), '\n')
 
 
 
-```{r,include=FALSE, fig.cap="\\label{fig:figs}Figure caption"}
-
+cat('The optimal lambda for inhomogeneous polynomial kernels is', lambda_min_poly,
+    'according to our manual function and', ker.cv.poly$lambda.min, 'according to the cv.krr function. The resulting RMSE are',
+    min(RMSFE[,2]), 'and',  min(ker.cv.poly$rmse), '\n')
 ```
 
 
 # Conclusion & Discussion
-In this paper we wanted to investigate whether we could predict an airline's revenue passenger miles (RPM), using fuel price and airline characteristics. Using kernel ridge regression, we found that XXXXXXXXXXXXXXXXX
+In this paper we wanted to investigate how well we could predict an airline's revenue passenger miles (RPM), using fuel price and airline characteristics. Using kernel ridge regression, we found that both the radial basis function kernel and the inhomogeneous polynomial kernel produced relatively accurate predictions. 
 
-Although we achieve predictions, we are in this analysis not distinguishing between what predictors are impoartant, their relative importance and the direction of that importance. Therefore, we cannot make any statements about the distinct explanatory factors. Nevertheless, predicitions can still be of use to planners in the aviation industry for their prospective business decisions. 
+However, the analysis is sensitive to the decisions we have made - we use two particular kernels because of their inherent benefits, but it is not clear how to optimally select a kernel and by our choice we introduce a functional form preference. We tune one of our hyperparameters and choose the other, meaning there is as a risk of suboptimal results. 
 
-Further, the analysis is sensitive to the decisions we have made - we chose two particular kernels beacause of their inherent benefits, but it is not clear how to optimally select a kernel and by our choice we introduce a functional form preference. We tune one of our parameters but choose the other, meaning there is as a risk of supobtimal results. 
+Although we achieve predictions, we are in this analysis not distinguishing between what predictors are important, their relative importance and the direction of that importance. Therefore, we cannot make any statements about the distinct explanatory factors. Nevertheless, predictions can still be of use to planners in the aviation industry for their prospective business decisions. It may also be of interest to policy makers, as an increased taxation on fuel would likely influence airlines profitability and this could be a way to understand how businesses would react.
 
 
 
