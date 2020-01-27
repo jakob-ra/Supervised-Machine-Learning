@@ -75,8 +75,12 @@ The penalty term $\lambda$ will be determined in a k-fold cross validation toget
 
 # Results
 
+![Results from 9-fold cross validation](/Users/Maja/Documents/GitHub/Supervised-Machine-Learning/HW3/manual_rmse.png)
+
+
 
 ```{r,include=FALSE, fig.cap="\\label{fig:figs}Figure caption"}
+
 ```
 
 
