@@ -1,16 +1,14 @@
+# *------------------------------------------------------------------
+# | PROGRAM NAME: Supervised Machine Learning - HW 3
+# | DATE: 23-1-2020
+# | CREATED BY: Jakob Rauch
+# *----------------------------------------------------------------
 
-load_airlinedata = function(s){
-  load(s)
-  y = Airline[[4]]
-  X = model.matrix(~factor(Airline$airline)+factor(Airline$year)+
-                     as.matrix(Airline[,c(3,5,6)])-1)
-  X = scale(X)
-  print(dim(X))
-  # X = model.matrix(~scale(Airline$cost)) # work with  p = 1 for visualizing
-  y = scale(y)
-  return(list(y,X))
-}
+# Clear cache
+rm(list = ls())
 
+# Import libraries
+library(dsmle)
 
 est.qtilde.gauss = function(y,K,lambda){
   # input: nx1 vector y (mean zero), nxn kernel matrix (K), 
@@ -46,7 +44,7 @@ av.rmsfe = function(y,X,fold,gamma,d,lambda){
     Ku = Kall[!train,train]
     qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain-mean(ytrain),Ktrain,lambda)
     # qall[!train] = qnew
-    RMSFE.gauss = RMSFE.gauss + 1/k*sum((ytest-qnew)^2)
+    RMSFE.gauss = RMSFE.gauss + 1/k*mean((ytest-qnew)^2)
     
     # inhom. polynomial kernel: 
     Kall = K_IHP(X,d)
@@ -54,7 +52,7 @@ av.rmsfe = function(y,X,fold,gamma,d,lambda){
     Ku = Kall[!train,train]
     qnew  = mean(ytrain) + Ku%*%est.qtilde.gauss(ytrain-mean(ytrain),Ktrain,lambda)
     # qall[!train] = qnew
-    RMSFE.poly = RMSFE.poly + 1/k*sum((ytest-qnew)^2)
+    RMSFE.poly = RMSFE.poly + 1/k*mean((ytest-qnew)^2)
     
   }
   
@@ -66,7 +64,7 @@ av.rmsfe = function(y,X,fold,gamma,d,lambda){
   
   
   # cat("RMSFE for lambda =",lambda,': ',RMSFE)
-  return(c(RMSFE.gauss,RMSFE.poly))
+  return(sqrt(c(RMSFE.gauss,RMSFE.poly)))
 }
 
 
@@ -84,45 +82,73 @@ cvalkrr.lambda = function(y,X,fold,gamma,d,lambdagrid){
 ## gaussian kernel 
 phi.gaussian = function(X,gamma) exp(-gamma*as.matrix(dist(X)^2)) 
 
-## other kernel  
+## inhomogeneous polynomial kernel  
 K_IHP = function(X,d) (1+X%*%t(X))^d
 
-main = function(){
-  s = 'Airline.RData'
-  dta = load_airlinedata(s)
-  y = dta[[1]]
-  X = as.matrix(dta[[2]])
-  k = 9 
-  
-  lambdagrid = seq(10^(-4), 20, length.out = 100)
-  gamma = 1/23
-  d=2
-  
-  
-  
-  # assign data randomly to one of the k bins 
-  n = length(y)
-  ntest = floor(n/k) # observations per bin
-  rank = rank(rnorm(n))
-  fold = rep(1:k,each = ntest) 
-  fold = fold[rank] # vector of assigned bin
-  
-  RMSFE = cvalkrr.lambda(y,X,fold,gamma,d,lambdagrid) # matrix of RMSFE for different lambda
-  
-  
-  plot(lambdagrid,RMSFE[,1],type='l',main = 'Gaussian kernel')
-  plot(lambdagrid,RMSFE[,2],type='l',main = 'Inhom. polynomial kernel') 
-  
-  # print(colMins(RMSFE))
-  
-  # # plot
-  # idx = order(X[,2])
-  # plot(X[,2],y,main="Kernel Ridge regression, gaussian kernel, whole sample")
-  # lines(X[,2][idx],qtilde.gauss[idx],col='blue')
-}
+
+# Load supermarket data from github
+githubURL = "https://github.com/jakob-ra/Supervised-Machine-Learning/raw/master/HW3/Airline.RData"
+load(url(githubURL))
+attach(Airline)
+y = output
+X = model.matrix(~ -1 + factor(airline) + year + cost + pf + lf)[,-1]
+X = scale(X)
+print(dim(X))
+# X = model.matrix(~scale(Airline$cost)) # work with  p = 1 for visualizing
+y = scale(y)
+
+p = dim(X)[2]
+k = 9 
+n_train = dim(y)/k*(k-1)
+
+lambdagrid = 10^seq(-8, 8, length.out = 100)
+gamma = 1/p
+d=2
 
 
-main()
+
+# assign data randomly to one of the k bins 
+n = length(y)
+ntest = floor(n/k) # observations per bin
+rank = rank(rnorm(n))
+fold = rep(1:k,each = ntest) 
+fold = fold[rank] # vector of assigned bin
+
+RMSFE = cvalkrr.lambda(y,X,fold,gamma,d,lambdagrid) # matrix of RMSFE for different lambda
+
+min_index = which.min(RMSFE[,1]) # Find index of lowest RMSE
+lambda_min_gaussian = lambdagrid[min_index] # lambda value at lowest RMSE
+print(lambda_min_gaussian)
+
+min_index = which.min(RMSFE[,2]) # Find index of lowest RMSE
+lambda_min_poly = lambdagrid[min_index] # lambda value at lowest RMSE
+print(lambda_min_poly)
+
+plot(lambdagrid,RMSFE[,1],type='l', log='x', main = 'Gaussian kernel',
+     xlab="Lambda", ylab="RMSE")
+abline(v=lambda_min_gaussian, col="purple")
+plot(lambdagrid,RMSFE[,2],type='l', log='x', main = 'Inhom. polynomial kernel',  xlab="Lambda", ylab="RMSE") 
+abline(v=lambda_min_poly, col="purple")
+
+
+
+# Compare manual to package for RBF
+ker.cv.rbf = cv.krr(as.vector(y), X, k.folds = 9, lambda = lambdagrid,
+                center = F, scale = F, kernel.type = "RBF", kernel.RBF.sigma = 1/2*p)
+ker.cv.poly = cv.krr(as.vector(y), X, k.folds = 9, lambda =  lambdagrid,
+                    center = F, scale = F, kernel.type = "nonhompolynom", kernel.degree = 2)
+op = par(mfrow = c(1, 2))
+plot(ker.cv.rbf, ylim = c(0, 6), las = 1)
+
+plot(ker.cv.poly, ylim = c(0, 6), las = 1)
+par(op)
+
+print(ker.cv.rbf$lambda.min)
+print(ker.cv.poly$lambda.min)
+
+
+
+
 
 
 
