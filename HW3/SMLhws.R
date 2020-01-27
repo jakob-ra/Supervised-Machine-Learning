@@ -25,7 +25,7 @@ est.qtilde.gauss = function(y,K,lambda){
 
 av.rmsfe = function(y,X,fold,gamma,d,lambda){
   # returns average RMSFE for a given lambda over k bins, for both kernels
-  n = dim(X)[1] 
+  n = dim(X)[1] # nr of observations
   k = max(fold) # nr of bins
   
   # qall.gauss = rep(NA,n) # store out of sample predictions for plot
@@ -90,20 +90,20 @@ K_IHP = function(X,d) (1+X%*%t(X))^d
 githubURL = "https://github.com/jakob-ra/Supervised-Machine-Learning/raw/master/HW3/Airline.RData"
 load(url(githubURL))
 attach(Airline)
+
 y = output
-X = model.matrix(~ -1 + factor(airline) + year + cost + pf + lf)[,-1]
+X = model.matrix(~ -1 + factor(airline) + year + cost + pf + lf)[,-1] # gets the X matrix with 5 airline dummies
+
+# Rescale
 X = scale(X)
-print(dim(X))
-# X = model.matrix(~scale(Airline$cost)) # work with  p = 1 for visualizing
 y = scale(y)
 
-p = dim(X)[2]
-k = 9 
-n_train = dim(y)/k*(k-1)
+p = dim(X)[2] # Nr of predictors
+k = 9 # Nr of folds
 
-lambdagrid = 10^seq(-8, 8, length.out = 100)
-gamma = 1/p
-d=2
+lambdagrid = 10^seq(-8, 0, length.out = 100) # values to try for lambda
+gamma = 1/p # fix gamma at 1/p
+d=2 # fix d at 2
 
 
 
@@ -118,17 +118,18 @@ RMSFE = cvalkrr.lambda(y,X,fold,gamma,d,lambdagrid) # matrix of RMSFE for differ
 
 min_index = which.min(RMSFE[,1]) # Find index of lowest RMSE
 lambda_min_gaussian = lambdagrid[min_index] # lambda value at lowest RMSE
-print(lambda_min_gaussian)
 
 min_index = which.min(RMSFE[,2]) # Find index of lowest RMSE
 lambda_min_poly = lambdagrid[min_index] # lambda value at lowest RMSE
-print(lambda_min_poly)
 
+# Plot lambda vs RMSE
+op = par(mfrow = c(1, 2))
 plot(lambdagrid,RMSFE[,1],type='l', log='x', main = 'Gaussian kernel',
      xlab="Lambda", ylab="RMSE")
 abline(v=lambda_min_gaussian, col="purple")
 plot(lambdagrid,RMSFE[,2],type='l', log='x', main = 'Inhom. polynomial kernel',  xlab="Lambda", ylab="RMSE") 
 abline(v=lambda_min_poly, col="purple")
+par(op)
 
 
 
@@ -137,19 +138,22 @@ ker.cv.rbf = cv.krr(as.vector(y), X, k.folds = 9, lambda = lambdagrid,
                 center = F, scale = F, kernel.type = "RBF", kernel.RBF.sigma = 1/2*p)
 ker.cv.poly = cv.krr(as.vector(y), X, k.folds = 9, lambda =  lambdagrid,
                     center = F, scale = F, kernel.type = "nonhompolynom", kernel.degree = 2)
-op = par(mfrow = c(1, 2))
-plot(ker.cv.rbf, ylim = c(0, 6), las = 1)
 
-plot(ker.cv.poly, ylim = c(0, 6), las = 1)
+
+op = par(mfrow = c(1, 2))
+plot(ker.cv.rbf, ylim = c(0, 2), las = 1)
+plot(ker.cv.poly, ylim = c(0, 2), las = 1)
 par(op)
 
-print(ker.cv.rbf$lambda.min)
-print(ker.cv.poly$lambda.min)
+
+# Compare optimal lambda, manual vs package
+cat('The optimal lambda for the gaussian kernel is', 
+    lambda_min_gaussian,
+    'according to our manual function and', ker.cv.rbf$lambda.min, 'according to the cv.krr function. The resulting RMSE are',
+    min(RMSFE[,1]), 'and',  min(ker.cv.rbf$rmse), '\n')
 
 
 
-
-
-
-
-
+cat('The optimal lambda for inhomogeneous polynomial kernels is', lambda_min_poly,
+    'according to our manual function and', ker.cv.poly$lambda.min, 'according to the cv.krr function. The resulting RMSE are',
+    min(RMSFE[,2]), 'and',  min(ker.cv.poly$rmse), '\n')
