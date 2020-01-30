@@ -10,6 +10,11 @@ output:
 # Introduction
 
 # Data
+- dropped variable `euribor3m` and `emp.var.rate` because they both contain numerical and date entries.
+- make dummies out of categorical variables
+- no constant
+- scaled predictors $X$ and outcome $y$ (z-scores).
+
 
 # Method
 
