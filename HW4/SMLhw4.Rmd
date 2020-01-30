@@ -1,0 +1,14 @@
+---
+title: "Supervised Machine Learning HW 4"
+author: "Group 3: Maja Nordfeldt, Jakob Rauch, Timo Schenk, Konstantin Sommer"
+date: "25-1-2020"
+output:
+  pdf_document:
+      fig_caption: yes
+  html_notebook: default
+---
+
+
+# Code
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
