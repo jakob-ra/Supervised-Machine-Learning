@@ -7,7 +7,15 @@ output:
       fig_caption: yes
   html_notebook: default
 ---
+# Introduction
 
+# Data
+
+# Method
+
+# Results
+
+# Conclusion
 
 # Code
 ```{r ref.label=knitr::all_labels(), echo = T, eval = F}
