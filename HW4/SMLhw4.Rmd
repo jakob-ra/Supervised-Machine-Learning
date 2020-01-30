@@ -12,8 +12,8 @@ output:
 # Data
 - dropped variable `euribor3m` and `emp.var.rate` because they both contain numerical and date entries.
 - make dummies out of categorical variables
-- no constant, so we end up with $p=52$ predictors.
- 
+- no constant, so we end up with $p=51$ predictors.
+- no observations in education illiterate, but model matrix command creates dummy with NANs for it.
 - scaled predictors $X$ and outcome $y$ (z-scores).
 
 
