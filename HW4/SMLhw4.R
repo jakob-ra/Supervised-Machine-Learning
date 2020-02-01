@@ -1,5 +1,7 @@
 set.seed(123456)
 
+library(SVMMaj)
+
 ### functions  
 
 ## calculate q g
@@ -74,7 +76,7 @@ k_fold_crossval = function(y,X,k,lambda,v0){
     X_test = X[c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)]),]
     X_train = X[-c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)]),]
     
-    beta = SVMMaj(y_train,X_train,lambda,v0) # get beta estimates for training data from majorization algorithm 
+    beta = SVMMaj_manual(y_train,X_train,lambda,v0) # get beta estimates for training data from majorization algorithm 
     fitted_val = (X_test)%*%beta # get qhat for test data
     TP=sum(fitted_val>1&y_test==1)
     TN=sum(fitted_val<(-1)&y_test==(-1))
@@ -130,7 +132,7 @@ v0 = rep(0,p+1)
 
 # lets go
 vhat = SVMMaj_manual(y,X,lambda,v0,epsilon = 1e-5)
-vhat
+print(vhat)
 
 #mis_error=k_fold_crossval(y,X,10,lambda=0.1,v0)
 man_results=min_loss(y,X,10,lambda_values=seq(0.01, 1, length.out = 20),v0=v0) ### find optimal lambda
@@ -142,7 +144,6 @@ vhat=SVMMaj_manual(y,X,opt_lambda,v0,epsilon = 1e-5) ##our solution with optimal
 
 
 ##Compare with package
-#library(SVMMaj)
 
 pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=seq(0.01, 1, length.out = 20))) ##Find optimal lambda
 cbind(opt_lambda,pack_results$param.opt)
