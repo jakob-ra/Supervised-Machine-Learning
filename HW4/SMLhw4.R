@@ -31,7 +31,7 @@ v.update = function(y,X,vold,lambdaP){
 
 ## SVMMaj MM algorithm
 
-SVMMaj_manual = function(y,X,lambda,v0,epsilon = 1e-5){
+SVMMaj_manual = function(y,X,lambda,v0,epsilon = 1e-9){
   # returns optimal v = (c,w)' given data y, X, penalty lambda
   # by running the MM algorithm with initial level v0 and stopping criterion
   # epsilon
@@ -69,7 +69,7 @@ k_fold_crossval = function(y,X,k,lambda,v0){
   loss=array(0,k) # Vector to hold the loss for each fold
   
   # Loop over the k folds and save MSEs
-  for (i in seq(1,k,1)){
+  for (i in 1:k){
     # Divide data into test and training
     y_test = y[c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
     y_train = y[-c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
@@ -80,8 +80,10 @@ k_fold_crossval = function(y,X,k,lambda,v0){
     fitted_val = (X_test)%*%beta # get qhat for test data
     TP=sum(fitted_val>1&y_test==1)
     TN=sum(fitted_val<(-1)&y_test==(-1))
-    loss[i]=1-(TP+TN)/n_test # save missclassification error values for test data
+    loss[i]=1-(TP+TN)/n_test # save average missclassification for test data
+    cat('.')
   }
+  cat('\n')
   loss=mean(loss) ##take average over found losses
   
   return(loss)
@@ -95,6 +97,7 @@ min_loss = function(y,X,k=10,lambda_values=10^seq(-3, 4, length.out = 10),v0){
   
   # Loop over hyperparameter combinations
   for (j in 1:length(lambda_values)){
+    cat('lambda = ',lambda_values[j])
     loss[j] = k_fold_crossval(y,X,k,lambda_values[j],v0) # Fill the matrix with losses
   }
   
@@ -126,26 +129,30 @@ X = cbind(1,X)
 # linear SVM
 p = ncol(X)-1
 
-# magic numbers
-lambda = 0.01
+# settings
 v0 = rep(0,p+1)
-
-# lets go
-vhat = SVMMaj_manual(y,X,lambda,v0,epsilon = 1e-5)
-print(vhat)
-
-#mis_error=k_fold_crossval(y,X,10,lambda=0.1,v0)
-man_results=min_loss(y,X,10,lambda_values=seq(0.01, 1, length.out = 20),v0=v0) ### find optimal lambda
-loss_vector=man_results[[1]]
-loss_vector
-opt_lambda=man_results[[2]]
-plot(loss_vector,type="l")
-vhat=SVMMaj_manual(y,X,opt_lambda,v0,epsilon = 1e-5) ##our solution with optimal lambda
+lambda_values=seq(0.01, 1, length.out = 20)
+epsilon = 1e-9
 
 
-##Compare with package
+# manual cross validation of lambda using quadratic hinge loss
+# man_results=min_loss(y,X,10,lambda_values,v0) # find optimal lambda
+# loss_vector=man_results[[1]]
+# opt_lambda=man_results[[2]]
+# plot(lambda_values,loss_vector,type="l") # plot average missclassification for different lambdas
 
-pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=seq(0.01, 1, length.out = 20))) ##Find optimal lambda
-cbind(opt_lambda,pack_results$param.opt)
-pack_vhat=svmmaj(X,y,opt_lambda,hinge="quadratic",scale="none") ###get coefficients for optimal beta
-cbind(vhat,pack_vhat$beta) ## compare our solution to package
+# compare cross validation to package 
+# pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=lambda_values)) ##Find optimal lambda
+# cbind(opt_lambda,pack_results$param.opt)
+
+
+# Compare with package for a fixed value of lambda
+
+lambda_compare = 1 # or set to opt_lambda from CV
+vhat=SVMMaj_manual(y,X,lambda_compare,v0,epsilon) # manual estimates
+pack_vhat=svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",scale="none") # get coefficients for optimal beta
+print(cbind(vhat,pack_vhat$beta)) # compare our solution to package
+print(mean(abs(vhat-pack_vhat$beta))) # mean absolute deviation of the estimates
+plot(vhat,pack_vhat$beta)
+abline(a=0,b=1,col='red') # 45 degree line
+# --> estimates the same, constant seems off?
