@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.8.18)  3 FEB 2020 18:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.8.18)  3 FEB 2020 19:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -658,50 +658,50 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 152.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 153.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 152.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 153.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 152
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 153
 .
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 152
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 153
 .
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 152.
+(Font)              <10> on input line 153.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 152.
+(Font)              <7> on input line 153.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 152.
-LaTeX Font Info:    Try loading font information for U+msa on input line 152.
+(Font)              <5> on input line 153.
+LaTeX Font Info:    Try loading font information for U+msa on input line 153.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/usr/local/texlive/2018/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 152.
+LaTeX Font Info:    Try loading font information for U+msb on input line 153.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/local/texlive/2018/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 153.
+(Font)              <8> on input line 154.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 153.
+(Font)              <6> on input line 154.
 
-Overfull \hbox (111.85327pt too wide) in paragraph at lines 170--182
+Overfull \hbox (111.85327pt too wide) in paragraph at lines 169--181
 []\T1/lmr/m/n/10 (-20) More pre-cisely, client at-tributes in-clude $\OML/lmm/m
 /it/10 age$\T1/lmr/m/n/10 (-20) , $\OML/lmm/m/it/10 job$ \T1/lmr/m/n/10 (-20) -
  be-ing ``admin.'',``blue-collar'',``entrepreneur'',``housemaid'',``management'
@@ -710,83 +710,75 @@ Overfull \hbox (111.85327pt too wide) in paragraph at lines 170--182
 
 [1
 
-{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-<./cvalplot.pdf, id=58, 505.89pt x 505.89pt>
+{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
+<./cvalplot.pdf, id=66, 505.89pt x 505.89pt>
 File: ./cvalplot.pdf Graphic file (type pdf)
 <use ./cvalplot.pdf>
-Package pdftex.def Info: ./cvalplot.pdf  used on input line 276.
+Package pdftex.def Info: ./cvalplot.pdf  used on input line 279.
 (pdftex.def)             Requested size: 234.88132pt x 234.88132pt.
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[2]
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 312.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 315.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-<./densityplot.pdf, id=70, 505.89pt x 505.89pt>
+<./densityplot.pdf, id=67, 505.89pt x 505.89pt>
 File: ./densityplot.pdf Graphic file (type pdf)
 <use ./densityplot.pdf>
-Package pdftex.def Info: ./densityplot.pdf  used on input line 321.
+Package pdftex.def Info: ./densityplot.pdf  used on input line 324.
 (pdftex.def)             Requested size: 234.88132pt x 234.88132pt.
-LaTeX Font Info:    Try loading font information for TS1+lmr on input line 366.
 
-(/usr/local/texlive/2018/texmf-dist/tex/latex/lm/ts1lmr.fd
-File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
-)
-Overfull \vbox (261.95036pt too high) has occurred while \output is active []
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-[3 <./cvalplot.pdf> <./densityplot.pdf>]
+[3 <./cvalplot.pdf>] [4 <./densityplot.pdf>]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 405.
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 436
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 415.
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 446
 .
 (/usr/local/texlive/2018/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
-) [4]
-Underfull \vbox (badness 10000) detected at line 604
+) [5]
+Underfull \vbox (badness 10000) detected at line 611
  []
 
 
-Underfull \vbox (badness 10000) detected at line 604
- []
-
-[5]
-Underfull \vbox (badness 10000) detected at line 604
- []
-
-
-Underfull \vbox (badness 10000) detected at line 604
+Underfull \vbox (badness 10000) detected at line 611
  []
 
 [6]
-Underfull \vbox (badness 10000) detected at line 604
+Underfull \vbox (badness 10000) detected at line 611
  []
 
 
-Underfull \vbox (badness 10000) detected at line 604
+Underfull \vbox (badness 10000) detected at line 611
  []
 
 [7]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 607.
+Underfull \vbox (badness 10000) detected at line 611
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 611
+ []
+
 [8]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 607.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 614.
+[9]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 614.
 (./SMLhw4.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 607.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 607.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 614.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 614.
 Package rerunfilecheck Info: File `SMLhw4.out' has not changed.
-(rerunfilecheck)             Checksum: 70A0C523E885C1DE75476821D038E371;636.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 607.
+(rerunfilecheck)             Checksum: 058ABAA3CBBD5C141696AF6D52603491;573.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 614.
  ) 
 Here is how much of TeX's memory you used:
- 12810 strings out of 492649
- 188095 string characters out of 6129622
- 328995 words of memory out of 5000000
- 16395 multiletter control sequences out of 15000+600000
- 61352 words of font info for 98 fonts, out of 8000000 for 9000
+ 12787 strings out of 492649
+ 187287 string characters out of 6129622
+ 328273 words of memory out of 5000000
+ 16365 multiletter control sequences out of 15000+600000
+ 58404 words of font info for 101 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 32i,8n,38p,430b,433s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 32i,8n,38p,430b,376s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local
 /texlive/2018/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/texlive/2018/
 texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2018/texmf-dist/fon
@@ -807,10 +799,10 @@ type1/public/lm/lmsy5.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publi
 c/lm/lmsy7.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtk10
 .pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr
 /local/texlive/2018/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on SMLhw4.pdf (8 pages, 319935 bytes).
+Output written on SMLhw4.pdf (9 pages, 320394 bytes).
 PDF statistics:
  199 PDF objects out of 1000 (max. 8388607)
- 166 compressed objects within 2 object streams
- 28 named destinations out of 1000 (max. 500000)
+ 165 compressed objects within 2 object streams
+ 29 named destinations out of 1000 (max. 500000)
  12355 words of extra memory for PDF output out of 14400 (max. 10000000)
 

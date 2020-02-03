@@ -14,23 +14,17 @@ knitr::opts_chunk$set(echo = F)
 
 
 # Introduction
-For  a variety of organizations, ranging from businesses to NGO's, cold-calling is a key component driving sales, recruitment and promotion. The payoffs of such labour-intensive efforts may vary greatly however, and figuring out who to target or not - and how - is of great interest for telemarketers all over the world. In this paper we aim to identify what predictors that explain telemarketers outcome representing a Portugese retail bank, and how well we can predict whether a call will be successful or not. In particular, we aim to predict whether a client subscribed a term deposit. We do so by employing a support vector machine approach, suitable for the large set of predictors and binary outcome of each observation. Although results being case-specific, the general findings may be of interests for all sectors. 
+For  a variety of organizations, ranging from businesses to NGO's, cold-calling is a key component driving sales, recruitment and promotion. The payoffs of such labour-intensive efforts may vary greatly however, and figuring out who to target or not - and how - is of great interest for telemarketers all over the world. In this paper we aim to identify what predictors that explain telemarketers outcome representing a Portugese retail bank, and how well we can predict whether a call will be successful or not. In particular, we aim to predict whether a client subscribed a term deposit. We do so by employing a support vector machine approach, suitable for the large set of predictors and binary outcome of each observation. Although results being case-specific, the general findings of whether prediction is possible, may be of interests for other sectors. 
 
 
 # Data
-The data utilized is originally provided by Moro et al. (2014) and is available to retrieve online^[Available at: [pdf] http://dx.doi.org/10.1016/j.dss.2014.03.001 bib] http://www3.dsi.uminho.pt/pcortez/bib/2014-dss.txt]], and covers the telemarketing phone calls selling long-term deposits of a Portugese retail bank. It includes 4119 clients are a sample of 10% of the original sample. 
+The data utilized is originally provided by Moro et al. (2014) and is available to retrieve online^[Available at: [pdf] http://dx.doi.org/10.1016/j.dss.2014.03.001], and covers the telemarketing phone calls selling long-term deposits of a Portugese retail bank. It includes 4119 clients are a sample of 10% of the original sample. 
 
-The binary outcome variable $y$, represents whether the called client subscribed to a term deposit and takes the value "yes" or "no". We transform this variable to $-1$ for "no" and $1$ for "yes". The dataset is not balanced, as a majority of the outcomes are "no".
-
-The predictor variables include characeristics of the telemarketing, the product sold and the client targeted. Additionally, predictors covering economic and social circumstances retrieved from the central bank of the Portuguese Republic^[Available at https://www.bportugal.pt/estatisticasweb] are included. 
+The binary outcome variable $y$, represents whether the called client subscribed to a term deposit and takes the value "yes" or "no". We transform this variable to $-1$ for "no" and $1$ for "yes". The dataset is not balanced, as a majority of the outcomes are "no".The predictor variables include characeristics of the telemarketing, the product sold and the client targeted. Additionally, predictors covering economic and social circumstances retrieved from the central bank of the Portuguese Republic^[Available at https://www.bportugal.pt/estatisticasweb] are included. 
 
 More precisely, client attributes include $age$, $job$ - being "admin.","blue-collar","entrepreneur","housemaid","management","retired","self-employed","services","student","technician","unemployed" or "unknown", $marital$ representing marital status of "divorced" (divorced or widowed),"married","single" or "unknown", $education$ representing  "basic.4y","basic.6y","basic.9y","high.school","illiterate","professional.course","university.degree"or "unknown", $default$ being having credit in default - "no","yes" or "unknown", $housing$ being having housing loan - "no","yes" or "unknown" as well as $loan$ - having a personal loan - "no","yes" or "unknown". We find that there are no observations in education illiterate, but model matrix command creates dummy with NANs for it.
 
-Further, variables related with the last contact of the current campaign incude $contact$ communication type -   "cellular" or "telephone",  $month$ denoting last contact month of year and $day_of_week$ being last contact day of the week. 
-
-Other attributes captured are $campaign$  - number of contacts performed during this campaign and for this client,  $pdays$: number of days that passed by after the client was last contacted from a previous campaign, $previous$: number of contacts performed before this campaign and for this client $poutcome$: outcome of the previous marketing campaign - "failure","nonexistent" or "success". 
-
-Further, social and economic context attributes include $cons.price.idx$ as consumer price index and $nr.employed$, the number of employees by a quarterly indicator.
+Further, variables related with the last contact of the current campaign incude $contact$ communication type -   "cellular" or "telephone",  $month$ denoting last contact month of year and $day_of_week$ being last contact day of the week.Other attributes captured are $campaign$  - number of contacts performed during this campaign and for this client,  $pdays$: number of days that passed by after the client was last contacted from a previous campaign, $previous$: number of contacts performed before this campaign and for this client $poutcome$: outcome of the previous marketing campaign - "failure","nonexistent" or "success". Lastly, social and economic context attributes include $cons.price.idx$ as consumer price index and $nr.employed$, the number of employees by a quarterly indicator.
 
 
 We exclude a few variables -  $euribor3m$ being theeuribor 3 month rate and $emp.var.rate$ being a quaterly indicator of employment variation rate because they both contain numerical and date entries. Further, we drop variable $duration$ being last contact duration as it is always $0$ when the outcome is $no$. All categorical variables are transformed to dummies,  so we end up with $p=50$ predictors in addition to a constant. All variables are scaled to z-scores. Finally, we draw a random sample of 1000 observations for computational speed. 
@@ -156,7 +150,10 @@ This loss function that we are aiming to minimize is given by $$L_{Quad-SVM(c;w)
 The decision rule is then when a predicted value is smaller than $0$ it will be predicted as $y=-1$ and for $q_i>0$ vice versa. In the loss function however, values in between minus and plus 1 do still count towards the error, since only the ones that are either below minus one or above one are here considered as being correct and all other count towards the loss. The width of this interval is determined by the size of the coefficients since they determine the value of $q_i$. This is where the penalty term comes into play, so by chosing different values for $\lambda$ one can determine how much the parameters are shrinked and therefore how large the described interval is. The intuition for the two maxima functions are that an observation either adds zero to the loss function, if it would be predicted correctly or it adds a number that is increasing in the distance to the actual correct value, -1 or 1. Such that values that are only predicted slightly wrong, but will still be classified incorrectly, in the loss function, counts less towards the loss than an observation that is preicted far of, but still gets classified the same as the one that is only a bit of.\\
 One can instead of minimizing over the squared maximum terms also maximizize over the absolute values or over what is known as a Hinge error term. The advantage of the squared expression is, that there must be a blobal minimum, since the Loss function is strictly convex and that there exists algorithms that can find this minimum in a reasonable time. We are using the so called majoorizing function algorithm for it.\\
 In order to find the optimal value of the hyperparameter, we are again relying on the k-fold cross validation. In contrast to other typical regression cases one must now chose a different measure of loss instead of the RMSE. We decided to base our deccission based on the $\lambda$ that minimizes the misclassification rate (defined as $1-Hitrate$), which is defined as one minues the sum over all correctly specified observations divided by the number of observations. This loss definition has a straight forawrd intuition since one wants to maximize the number of correctly predicted values.\\
-As an extension, we also use some nonlinear vector machines, that rely on kernel methods. In these, we map the predictors into a higher dimension, e.g. by using polynomials and synergy effects and try to predict linear in that space. These methods will probably lead to a better in sample prediction but might lead to larger overidentification issues, when not adjusting the hyperparameter. We will not determine the optimal $\lambda$ value for these estimations but it can be assumed that it would need to be higher.
+As an extension, we also use some nonlinear vector machines, that rely on kernel methods. In these, we map the predictors into a higher dimension, e.g. by using polynomials and synergy effects and try to predict linear in that space. These methods will probably lead to a better in sample prediction but might lead to larger overidentification issues, when not adjusting the hyperparameter. We will not determine the optimal $\lambda$ value for these estimations but it can be assumed that it would need to be higher. We use a radial basis function kernel with $\sigma = 1$, as well as a polynomial one of degree 2 with added term 1 and copmutations are done with the package SVMmaj.
+
+\newpage
+
 # Results
 ```{r,include=F,message=F}
 set.seed(123456)
@@ -256,7 +253,6 @@ sum(ypred!=((pack_vhat$q>0)-(pack_vhat$q<0))) # predictions are the same
 
 ```
 
-## non-linear kernel
 
 ```{r,eval=F}
 # Results different Kernels
@@ -266,31 +262,32 @@ pack_vhat_rbf <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
 pack_vhat_poly <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
                          scale="none", kernel=polydot,kernel.degree=2,
                          kernel.offset =1,kernel.scale=1) # Poly kernel degree 2, added term = 1
-pack_vhat_laplace <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
-                            scale="none", kernel=laplacedot,kernel.sigma=1)  # Laplace kernel sigma = 1
 
 # Comparing kernels performance
 summary(pack_vhat_rbf)[19]
 summary(pack_vhat_poly)[19] 
-summary(pack_vhat_laplace)[19]
 
 ```
-The first thing we determine is the optimal $\lambda$ value, which we derive by cross validation, as described before. Th $\lambda$ that minimizes our missclassification rate is 0.427, with an avergae corresponding missclassification rate of 9.6%. So we are able to predict more than 90% of the values correctly as either no or yes in out of sample prediction (on average). The found optimal value of the package is slightly different, which could be based on the choice of a different loss measure. \\
-Based on this optimal value of our hyperparamter we are doing our actual analysis and determine the weights of our variables. We are able to estimate all weights exactly equal to the ones from the package. We present the five coefficients with the largest absolut value and therefore with the largest effect on our endogenous variable (because all variables are standardized). On can for example see that changing the value of nr.employed from 0 to one changes our predicted value by -0.15, so increasing the number of employees by one standard deviation will change our prediction by -0.15. So since we define no as -1, the number of employees surprisingly lowers the chances of a customer subsribing to a term deposit. The same is true if the customer was for the last time called in August as opposed to when he/she was called in June, which seems relatively perculiar. It also seems to push people towards "no" if they get contacted via phone. \\
+
+\newpage
+
+The first thing we determine is the optimal $\lambda$ value, which we derive by cross validation, as described before. Th $\lambda$ that minimizes our missclassification rate is 0.427, with an avergae corresponding missclassification rate of 9.6%. So we are able to predict more than 90% of the values correctly as either no or yes in out of sample prediction (on average). The found optimal value of the package is slightly different, which could be based on the choice of a different loss measure.
+
+Based on this optimal value of our hyperparamter we are doing our actual analysis and determine the weights of our variables. We are able to estimate all weights exactly equal to the ones from the package. We present the five coefficients with the largest absolut value and therefore with the largest effect on our endogenous variable (because all variables are standardized). On can for example see that changing the value of nr.employed from 0 to one changes our predicted value by -0.15, so increasing the number of employees by one standard deviation will change our prediction by -0.15. So since we define no as -1, the number of employees surprisingly lowers the chances of a customer subsribing to a term deposit. The same is true if the customer was for the last time called in August as opposed to when he/she was called in June, which seems relatively perculiar. It also seems to push people towards "no" if they get contacted via phone. 
+
 We are also presenting the confusion matrix, in which one can see the number of correctly and incorrectly predicted y values in sample. Together with our density plot in Figure 2, one can see that the minus one, so the No answers, get predicted relatively well, which is because there are just way more no than yes answers, so the algorithm is able to learn about these answers much better than about the yes or $y=1$ answers. We are able to predict 880 correct no answers and only predict 75 incorrectly as no. For the yes answers, we correctly predict 32 and classify 13 as yes even though they should have been no answers.
 
-
-
-- Prediction success alternative kernels: measures of classificationpackage with alternative kernels
-
+Lastly, from the predicitons under our radial basis function kernel we reach a hit rate of $0.998$, and under our polynomial one a hit rate of $1$, however both under $\lambda = 0.4$ not optimized for these kernels. 
 
 
 # Conclusion
-In this paper, we aimed to predict the outcome of bank client sales call given a set of predictors. Using a support vector machine strategy, we managed to identify wheights of a number of predictor variables determining whether a bank client subscribed a term deposit. 
 
-We find that we can succesfully predict the calls not leading to sign-up, while it is harder to predict the ones that do sign up for one. If one would use the whole data set, this could most likely be improved. Surprisingly variables like the month in which customers are contacted have a relatively large influence on the predicted value and calling customers on the phone seems to be counterproductive.
+In this paper, we aimed to predict the outcome of bank client sales call given a set of predictors. Using a support vector machine strategy, we managed to identify wheights of a number of predictor variables determining whether a bank client subscribed a term deposit, as well as reach a hit rate over $90$%. Turning to alternatives to the linear kernel, we were able to improve this rate even further. 
 
-Future research could focus on predicting succesful outcomes, as this is of great business interest. It may also use different hinge functions and examine whether results vary, as we in this paper focus on the quadratic one. Further, we restrict the analyiss to a sample of $1000$ observations due to limited computational capability. Using the full dataset and comparing the outcomes would be another interesting future application. 
+We find that we can succesfully predict the calls not leading to sign-up, while it is harder to predict the ones that do sign up for one. This is not surprising given the unbalanced dataset. If one would use the whole data set, this could most likely be somewhat improved.
+Regarding predictors we could identify some important factor - surprisingly variables like the month in which customers are contacted have a relatively large influence on the predicted value and calling customers on the phone seems to be counterproductive. This is of interest for planning optimal telemarketing. Whether these results generalizes to other settings is however open for future research to answer. However, our high hit rates may indicatee that for telemarketers in general predictive models of this type are worth exploring. 
+
+Future research could focus on predicting succesful outcomes, as this is of great business interest, utilizing  successful outcome data. It may also use different hinge functions and examine whether results vary, as we in this paper focus on the quadratic one. Further, we restrict the analyiss to a sample of $1000$ observations due to limited computational capability. Using the full dataset and comparing the outcomes would be another interesting future application. 
 
 
 
@@ -298,7 +295,7 @@ Future research could focus on predicting succesful outcomes, as this is of grea
 
 # References
 
-Moro et al., 2014] S. Moro, P. Cortez and P. Rita. A Data-Driven Approach to Predict the Success of Bank Telemarketing. Decision Support Systems, In press, http://dx.doi.org/10.1016/j.dss.2014.03.001
+S. Moro, P. Cortez and P. Rita. (2014) A Data-Driven Approach to Predict the Success of Bank Telemarketing. Decision Support Systems, In press, http://dx.doi.org/10.1016/j.dss.2014.03.001
 
 # Code
 
