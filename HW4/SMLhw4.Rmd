@@ -12,7 +12,7 @@ For  a variety of organizations, ranging from businesses to NGO's, cold-calling 
 
 
 # Data
-The data utilized is originally provided by Moro et al. (2014) and is available to retrieve online^[Available at: [pdf] http://dx.doi.org/10.1016/j.dss.2014.03.001 bib] http://www3.dsi.uminho.pt/pcortez/bib/2014-dss.txt]], and covers the telemarketing phone calls selling long-term deposits of a Portugese retail bank. 
+The data utilized is originally provided by Moro et al. (2014) and is available to retrieve online^[Available at: [pdf] http://dx.doi.org/10.1016/j.dss.2014.03.001 bib] http://www3.dsi.uminho.pt/pcortez/bib/2014-dss.txt]], and covers the telemarketing phone calls selling long-term deposits of a Portugese retail bank. It includes 4119 clients are a sample of 10% of the original sample. 
 
 The binary outcome variable $y$, represents whether the called client subscribed to a term deposit and takes the value "yes" or "no". We transform this variable to $-1$ for "no" and $1$ for "yes". The dataset is not balanced, as a majority of the outcomes are "no".
 
