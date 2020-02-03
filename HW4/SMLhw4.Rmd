@@ -261,12 +261,12 @@ sum(ypred!=((pack_vhat$q>0)-(pack_vhat$q<0))) # predictions are the same
 ```{r,eval=F}
 # Results different Kernels
 library(kernlab)
-pack_vhat_rbf <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",
+pack_vhat_rbf <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
                         scale="none", kernel=rbfdot, kernel.sigma=1)  # RBF kernel, sigma = 1
-pack_vhat_poly <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",
+pack_vhat_poly <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
                          scale="none", kernel=polydot,kernel.degree=2,
                          kernel.offset =1,kernel.scale=1) # Poly kernel degree 2, added term = 1
-pack_vhat_laplace <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",
+pack_vhat_laplace <- svmmaj(X,y,lambda = opt_lambda,hinge="quadratic",
                             scale="none", kernel=laplacedot,kernel.sigma=1)  # Laplace kernel sigma = 1
 
 # Comparing kernels performance
@@ -285,9 +285,7 @@ We are also presenting the confusion matrix, in which one can see the number of 
 
 
 
-
-# Conclusion & Discussion
-\section{Conclusion}
+# Conclusion
 In this paper, we aimed to predict the outcome of bank client sales call given a set of predictors. Using a support vector machine strategy, we managed to identify wheights of a number of predictor variables determining whether a bank client subscribed a term deposit. 
 
 We find that we can succesfully predict the calls not leading to sign-up, while it is harder to predict the ones that do sign up for one. If one would use the whole data set, this could most likely be improved. Surprisingly variables like the month in which customers are contacted have a relatively large influence on the predicted value and calling customers on the phone seems to be counterproductive.
