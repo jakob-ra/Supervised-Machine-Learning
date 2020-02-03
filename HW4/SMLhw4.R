@@ -1,11 +1,7 @@
 set.seed(123456)
-
 library(SVMMaj)
 
 ### functions  
-
-## calculate q g
-# q =function(X,c,w) c+X%*%w
 
 ## SVM loss
 loss.svm.quad= function(y,q,w,lambda){
