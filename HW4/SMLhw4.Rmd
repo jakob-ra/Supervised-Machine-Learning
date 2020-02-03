@@ -8,25 +8,53 @@ output:
   html_notebook: default
 ---
 # Introduction
+For  a variety of organizations, ranging from businesses to NGO's, cold-calling is a key component driving sales, recruitment and promotion. The payoffs of such labour-intensive efforts may vary greatly however, and figuring out who to target or not - and how - is of great interest for telemarketers all over the world. In this paper we aim to identify what predictors that explain telemarketers outcome representing a Portugese retail bank, and how well we can predict whether a call will be successful or not. In particular, we aim to predict whether a client subscribed a term deposit. We do so by employing a support vector machine approach, suitable for the large set of predictors and binary outcome of each observation. Although results being case-specific, the general findings may be of interests for all sectors. 
+
 
 # Data
-- dropped variable `euribor3m` and `emp.var.rate` because they both contain numerical and date entries.
-- make dummies out of categorical variables
-- no constant, so we end up with $p=51$ predictors.
-- no observations in education illiterate, but model matrix command creates dummy with NANs for it.
-- scaled predictors $X$ and outcome $y$ (z-scores).
+The data utilized is originally provided by Moro et al. (2014) and is available to retrieve online^[Available at: [pdf] http://dx.doi.org/10.1016/j.dss.2014.03.001 bib] http://www3.dsi.uminho.pt/pcortez/bib/2014-dss.txt]], and covers the telemarketing phone calls selling long-term deposits of a Portugese retail bank. 
 
+The binary outcome variable $y$, represents whether the called client subscribed to a term deposit and takes the value "yes" or "no". We transform this variable to $-1$ for "no" and $1$ for "yes". The dataset is not balanced, as a majority of the outcomes are "no".
+
+The predictor variables include characeristics of the telemarketing, the product sold and the client targeted. Additionally, predictors covering economic and social circumstances retrieved from the central bank of the Portuguese Republic^[Available at https://www.bportugal.pt/estatisticasweb] are included. 
+
+More precisely, client attributes include $age$, $job$ - being "admin.","blue-collar","entrepreneur","housemaid","management","retired","self-employed","services","student","technician","unemployed" or "unknown", $marital$ representing marital status of "divorced" (divorced or widowed),"married","single" or "unknown", $education$ representing  "basic.4y","basic.6y","basic.9y","high.school","illiterate","professional.course","university.degree"or "unknown", $default$ being having credit in default - "no","yes" or "unknown", $housing$ being having housing loan - "no","yes" or "unknown" as well as $loan$ - having a personal loan - "no","yes" or "unknown". We find that there are no observations in education illiterate, but model matrix command creates dummy with NANs for it.
+
+Further, variables related with the last contact of the current campaign incude $contact$ communication type -   "cellular" or "telephone",  $month$ denoting last contact month of year and $day_of_week$ being last contact day of the week. 
+
+Other attributes captured are $campaign$  - number of contacts performed during this campaign and for this client,  $pdays$: number of days that passed by after the client was last contacted from a previous campaign, $previous$: number of contacts performed before this campaign and for this client $poutcome$: outcome of the previous marketing campaign - "failure","nonexistent" or "success". 
+
+Further, social and economic context attributes include $cons.price.idx$ as consumer price index and $nr.employed$, the number of employees by a quarterly indicator.
+
+
+We exclude a few variables -  $euribor3m$ being theeuribor 3 month rate and $emp.var.rate$ being a quaterly indicator of employment variation rate because they both contain numerical and date entries. Further, we drop variable $duration$ being last contact duration as it is only known after the call is made. All categorical variables are transformed to dummies,  so we end up with $p=50$ predictors in addition to a constant. All variables are scaled to z-scores. Finally, we draw a random sample of 1000 observations for computational speed. 
 
 # Method
 The question that we are asking is a classification type question. We are trying to classify based on some available characterisitics if a customer will chose yes or no. We therefore use a method called support vector machine. Its purpose is to predict in a linear regression (can also be extended to nonlinear) type estimation the value of the endogeneous variable, in our case y, if the client subscribed a term deposit. In order to that we are maximizing a loss function, that minimizes the likelihood of being far of the right solution, so if clients with a predicted value that is far from the actual decission is predicted wrong, that influences the loss heavier than closer ones. Additionally we include a penalizing term, that in this case does not only full fill a parameter shrinkage function, but also determines the width of an intervall in which we will not give a prediction about the choice of the client.\\
 This loss function that we are aiming to minimize is given by $$L_{Quad-SVM(c;w)}=\sum_{i \in G_{-1}}\max(0; q_i + 1)^2 +\sum_{i \in G_{1}}\max(0;1- q_i)^2+ \lambda w^Tw$$ where $\q_i$ is the predicted value from $c+x_i^Tw$, with $x_i$ the observation of individual $i$, $c$ the constant and $w$ the weights or coefficient vector. $G_{-1}$ and $G_1$ describe the set of individuals for which y is either $-1$ or $1$ so that an observation counts towards the loss function for only of the two terms.\\
-The decission rule is then when a predicted value is smaller than $-1$ it will be predicted as $y=-1$ and for $q_i>1$ vice versa. This implies that for all values that are predicted in between they will not be assigned to a yes or no answer. The width of this intervall is determined by the size of the coefficients since they determine the value of $q_i$. This is where the penalty term comes into play, so by chosing different values for $\lambda$ one can determine how much the parameters are shrinked and therefore how large the described interval is. The intuition for the two maxima functions are that an observation either adds zero to the loss function, if it would be predicted correctly or it adds a number that is increasing in the distance to the actual correct value, -1 or 1. Such that values that are only predicted slightly wrong, but will still be classified incorrectly counts less towards the loss than an observation that is preicted far of, but still gets classified the same as the one that is only a bit of.\\
+The decision rule is then when a predicted value is smaller than $0$ it will be predicted as $y=-1$ and for $q_i>0$ vice versa. This implies that for all values that are predicted in between they will not be assigned to a yes or no answer. The width of this interval is determined by the size of the coefficients since they determine the value of $q_i$. This is where the penalty term comes into play, so by chosing different values for $\lambda$ one can determine how much the parameters are shrinked and therefore how large the described interval is. The intuition for the two maxima functions are that an observation either adds zero to the loss function, if it would be predicted correctly or it adds a number that is increasing in the distance to the actual correct value, -1 or 1. Such that values that are only predicted slightly wrong, but will still be classified incorrectly counts less towards the loss than an observation that is preicted far of, but still gets classified the same as the one that is only a bit of.\\
 One can instead of minimizing over the squared maximum terms also maximizize over the absolute values or over what is known as a Hinge error term. The advantage of the squared expression is, that there must be a blobal minimum, since the Loss function is strictly convex and that there exists algorithms that can find this minimum in a reasonable time. We are using the so called majoorizing function algorithm for it.\\
 In order to find the optimal value of the hyperparameter, we are again relying on the k-fold cross validation. In contrast to other typical regression cases one must now chose a different measure of loss instead of the RMSE. We decided to base our deccission based on the $\lambda$ that minimizes the misclassification rate, which is defined as one minues the sum over all correctly specified observations divided by the number of observations. This loss definition has a straight forawrd intuition since one wants to maximize the number of correctly predicted values.
 
 # Results
 
-# Conclusion
+
+
+
+# Conclusion & Discussion
+In this paper, we aimed to predict the outcome of bank client sales call given a set of predictors. Using a support vector machine strategy, we managed to identify wheights of a number of predictor variables determining whether a bank client subscribed a term deposit. 
+
+We find that we can succesfully predict the calls not leading to sign-up. XXXXX +++ discuss use of results
+
+Future research could focus on predicting succesful outcomes, as this is of great business interest. It may also use different hinge functions and examine whether results vary, as we in this paper focus on the quadratic one. Further, we restrict the analyiss to a sample of $1000$ observations due to limited computational capability. Using the full dataset and comparing the outcomes would be another interesting future application. 
+
+
+
+
+
+# References
+
+Moro et al., 2014] S. Moro, P. Cortez and P. Rita. A Data-Driven Approach to Predict the Success of Bank Telemarketing. Decision Support Systems, In press, http://dx.doi.org/10.1016/j.dss.2014.03.001
 
 # Code
 ```{r ref.label=knitr::all_labels(), echo = T, eval = F}
