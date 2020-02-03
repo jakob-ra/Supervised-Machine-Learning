@@ -58,4 +58,18 @@ Moro et al., 2014] S. Moro, P. Cortez and P. Rita. A Data-Driven Approach to Pre
 
 # Code
 ```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+
+# Results different Kernels
+library(kernlab)
+pack_vhat_rbf <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",scale="none", kernel=rbfdot, kernel.sigma=1)  # RBF kernel, sigma = 1
+pack_vhat_poly <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",scale="none", kernel=polydot,kernel.degree=2,kernel.offset =1,kernel.scale=1) # Poly kernel degree 2, added term = 1
+pack_vhat_laplace <- svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",scale="none", kernel=laplacedot,kernel.sigma=1)  # Laplace kernel sigma = 1
+
+# Comparing kernels performance
+summary(pack_vhat_rbf)[19]
+summary(pack_vhat_poly)[19] 
+summary(pack_vhat_laplace)[19]
+
+
+
 ```
