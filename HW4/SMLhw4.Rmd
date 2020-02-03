@@ -155,10 +155,8 @@ The question that we are asking is a classification type question. We are trying
 This loss function that we are aiming to minimize is given by $$L_{Quad-SVM(c;w)}=\sum_{i \in G_{-1}}\max(0; q_i + 1)^2 +\sum_{i \in G_{1}}\max(0;1- q_i)^2+ \lambda w^Tw$$ where $q_i$ is the predicted value from $c+x_i^Tw$, with $x_i$ the observation of individual $i$, $c$ the constant and $w$ the weights or coefficient vector. $G_{-1}$ and $G_1$ describe the set of individuals for which y is either $-1$ or $1$ so that an observation counts towards the loss function for only of the two terms.\\
 The decision rule is then when a predicted value is smaller than $0$ it will be predicted as $y=-1$ and for $q_i>0$ vice versa. In the loss function however, values in between minus and plus 1 do still count towards the error, since only the ones that are either below minus one or above one are here considered as being correct and all other count towards the loss. The width of this interval is determined by the size of the coefficients since they determine the value of $q_i$. This is where the penalty term comes into play, so by chosing different values for $\lambda$ one can determine how much the parameters are shrinked and therefore how large the described interval is. The intuition for the two maxima functions are that an observation either adds zero to the loss function, if it would be predicted correctly or it adds a number that is increasing in the distance to the actual correct value, -1 or 1. Such that values that are only predicted slightly wrong, but will still be classified incorrectly, in the loss function, counts less towards the loss than an observation that is preicted far of, but still gets classified the same as the one that is only a bit of.\\
 One can instead of minimizing over the squared maximum terms also maximizize over the absolute values or over what is known as a Hinge error term. The advantage of the squared expression is, that there must be a blobal minimum, since the Loss function is strictly convex and that there exists algorithms that can find this minimum in a reasonable time. We are using the so called majoorizing function algorithm for it.\\
-In order to find the optimal value of the hyperparameter, we are again relying on the k-fold cross validation. In contrast to other typical regression cases one must now chose a different measure of loss instead of the RMSE. We decided to base our deccission based on the $\lambda$ that minimizes the misclassification rate (defined as $1-Hitrate$), which is defined as one minues the sum over all correctly specified observations divided by the number of observations. This loss definition has a straight forawrd intuition since one wants to maximize the number of correctly predicted values.
-
-+ alternative kernels used 
-
+In order to find the optimal value of the hyperparameter, we are again relying on the k-fold cross validation. In contrast to other typical regression cases one must now chose a different measure of loss instead of the RMSE. We decided to base our deccission based on the $\lambda$ that minimizes the misclassification rate (defined as $1-Hitrate$), which is defined as one minues the sum over all correctly specified observations divided by the number of observations. This loss definition has a straight forawrd intuition since one wants to maximize the number of correctly predicted values.\\
+As an extension, we also use some nonlinear vector machines, that rely on kernel methods. In these, we map the predictors into a higher dimension, e.g. by using polynomials and synergy effects and try to predict linear in that space. These methods will probably lead to a better in sample prediction but might lead to larger overidentification issues, when not adjusting the hyperparameter. We will not determine the optimal $\lambda$ value for these estimations but it can be assumed that it would need to be higher.
 # Results
 ```{r,include=F,message=F}
 set.seed(123456)
@@ -210,8 +208,6 @@ pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=lambda_value
 knitr::include_graphics('./cvalplot.pdf')
 ```
 
-Optimal: $\lambda=0.427$ with  out-of-sample misclassification of 9.6\%.
-Now check most important predictors and in-sample diagnostics for the optimal lambda:
 
 ```{r}
 # ----  confusion matrix and hitrate ----
@@ -279,22 +275,22 @@ summary(pack_vhat_poly)[19]
 summary(pack_vhat_laplace)[19]
 
 ```
+The first thing we determine is the optimal $\lambda$ value, which we derive by cross validation, as described before. Th $\lambda$ that minimizes our missclassification rate is 0.427, with an avergae corresponding missclassification rate of 9.6%. So we are able to predict more than 90% of the values correctly as either no or yes in out of sample prediction (on average). The found optimal value of the package is slightly different, which could be based on the choice of a different loss measure. \\
+Based on this optimal value of our hyperparamter we are doing our actual analysis and determine the weights of our variables. We are able to estimate all weights exactly equal to the ones from the package. We present the five coefficients with the largest absolut value and therefore with the largest effect on our endogenous variable (because all variables are standardized). On can for example see that changing the value of nr.employed from 0 to one changes our predicted value by -0.15, so increasing the number of employees by one standard deviation will change our prediction by -0.15. So since we define no as -1, the number of employees surprisingly lowers the chances of a customer subsribing to a term deposit. The same is true if the customer was for the last time called in August as opposed to when he/she was called in June, which seems relatively perculiar. It also seems to push people towards "no" if they get contacted via phone. \\
+We are also presenting the confusion matrix, in which one can see the number of correctly and incorrectly predicted y values in sample. Together with our density plot in Figure 2, one can see that the minus one, so the No answers, get predicted relatively well, which is because there are just way more no than yes answers, so the algorithm is able to learn about these answers much better than about the yes or $y=1$ answers. We are able to predict 880 correct no answers and only predict 75 incorrectly as no. For the yes answers, we correctly predict 32 and classify 13 as yes even though they should have been no answers.
 
 
 
-
-- Optimized parameter: Optimal lambda package vs own (show with plot)
-- Prediction success: measures of classification own and package linear (density plot of predictions, hitrate, misclassiffciation rate, precision)
-- Predictor importance: identified Weights and their interpretation (show with table)
 - Prediction success alternative kernels: measures of classificationpackage with alternative kernels
 
 
 
 
 # Conclusion & Discussion
+\section{Conclusion}
 In this paper, we aimed to predict the outcome of bank client sales call given a set of predictors. Using a support vector machine strategy, we managed to identify wheights of a number of predictor variables determining whether a bank client subscribed a term deposit. 
 
-We find that we can succesfully predict the calls not leading to sign-up. XXXXX +++ discuss use of results
+We find that we can succesfully predict the calls not leading to sign-up, while it is harder to predict the ones that do sign up for one. If one would use the whole data set, this could most likely be improved. Surprisingly variables like the month in which customers are contacted have a relatively large influence on the predicted value and calling customers on the phone seems to be counterproductive.
 
 Future research could focus on predicting succesful outcomes, as this is of great business interest. It may also use different hinge functions and examine whether results vary, as we in this paper focus on the quadratic one. Further, we restrict the analyiss to a sample of $1000$ observations due to limited computational capability. Using the full dataset and comparing the outcomes would be another interesting future application. 
 
