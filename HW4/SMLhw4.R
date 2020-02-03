@@ -31,7 +31,7 @@ v.update = function(y,X,vold,lambdaP){
 
 ## SVMMaj MM algorithm
 
-SVMMaj_manual = function(y,X,lambda,v0,epsilon = 1e-9){
+SVMMaj_manual = function(y,X,lambda,v0,epsilon = 1e-8){
   # returns optimal v = (c,w)' given data y, X, penalty lambda
   # by running the MM algorithm with initial level v0 and stopping criterion
   # epsilon
@@ -56,20 +56,24 @@ SVMMaj_manual = function(y,X,lambda,v0,epsilon = 1e-9){
   return(vnew)
 }
 ### k-fold
-k_fold_crossval = function(y,X,k,lambda,v0){
+k_fold_crossval = function(y,X,k,lambda,v0,reshuffled_indices){
   # Function for k-fold crossvalidation, returns RMSE for given alpha and lambda
+  # and shuffled indices
+  
   n = length(y) # Number of observations
   p = (dim(X)[2]) # Number of parameters
   
   # Reshuffle data and split into k groups of equal size
-  reshuffled_indices = sample(seq(1,n,1), n, replace=FALSE) # Shuffle indices of our n observations
+  reshuffled_indices = sample(1:n, n, replace=FALSE) # Shuffle indices of our n observations
+  
   n_test = floor(n/k) # n=77 and k=10 would give 7 obs. in the test set the rest of the observations
   # in the training set. For n=77, using k=11 or k=7 is advisable to get evenly sized groups.
   
-  loss=array(0,k) # Vector to hold the loss for each fold
+  loss=rep(0,k) # Vector to hold the loss for each fold
   
   # Loop over the k folds and save MSEs
   for (i in 1:k){
+    
     # Divide data into test and training
     y_test = y[c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
     y_train = y[-c(reshuffled_indices[(1+(i-1)*n_test):(i*n_test)])]
@@ -78,13 +82,14 @@ k_fold_crossval = function(y,X,k,lambda,v0){
     
     beta = SVMMaj_manual(y_train,X_train,lambda,v0) # get beta estimates for training data from majorization algorithm 
     fitted_val = (X_test)%*%beta # get qhat for test data
-    TP=sum(fitted_val>1&y_test==1)
-    TN=sum(fitted_val<(-1)&y_test==(-1))
+    TP=sum(fitted_val>0&y_test==1)
+    TN=sum(fitted_val<0&y_test==(-1))
     loss[i]=1-(TP+TN)/n_test # save average missclassification for test data
     cat('.')
   }
-  cat('\n')
   loss=mean(loss) ##take average over found losses
+  cat('mean loss for lambda =',lambda,':',loss)
+  cat('\n')
   
   return(loss)
 }
@@ -97,7 +102,7 @@ min_loss = function(y,X,k=10,lambda_values=10^seq(-3, 4, length.out = 10),v0){
   
   # Loop over hyperparameter combinations
   for (j in 1:length(lambda_values)){
-    cat('lambda = ',lambda_values[j])
+    # cat('lambda = ',lambda_values[j])
     loss[j] = k_fold_crossval(y,X,k,lambda_values[j],v0) # Fill the matrix with losses
   }
   
@@ -118,7 +123,7 @@ y = 2*as.numeric(bank$y)-3   # scale to -1,1 instead of 1,2
 
 # transform categorical variables to dummies
 # omit euribor3m, weird entries.
-X = model.matrix(y~.-euribor3m -emp.var.rate -1 ,data = bank)
+X = model.matrix(y~.-euribor3m -emp.var.rate -duration -1 ,data = bank)
 # no observations in education illiterate, but model matrix command creates dummy with NANs for it:
 
 X = scale(X)
@@ -132,27 +137,55 @@ p = ncol(X)-1
 # settings
 v0 = rep(0,p+1)
 lambda_values=seq(0.01, 1, length.out = 20)
-epsilon = 1e-9
+epsilon = 1e-8 # the default of the package
 
-
+# ---- Cross Validation -----------
 # manual cross validation of lambda using quadratic hinge loss
-# man_results=min_loss(y,X,10,lambda_values,v0) # find optimal lambda
-# loss_vector=man_results[[1]]
-# opt_lambda=man_results[[2]]
-# plot(lambda_values,loss_vector,type="l") # plot average missclassification for different lambdas
+man_results=min_loss(y,X,10,lambda_values,v0) # find optimal lambda
+loss_vector=man_results[[1]]
+opt_lambda=man_results[[2]]
+pdf('cvalplot.pdf')
+plot(lambda_values,loss_vector,type='l',
+     ylim=c(0,0.15),xlab='lambda',ylab='missclassification rate',
+     main='Cross-validation performance per grid value') # plot average missclassification for different lambdas
+dev.off()
+# compare cross validation to package
+pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=lambda_values)) ##Find optimal lambda
+cbind(opt_lambda,pack_results$param.opt)
 
-# compare cross validation to package 
-# pack_results=svmmajcrossval(X,y,ngroup=10,search.grid = list(lambda=lambda_values)) ##Find optimal lambda
-# cbind(opt_lambda,pack_results$param.opt)
-
-
-# Compare with package for a fixed value of lambda
-
-lambda_compare = 1 # or set to opt_lambda from CV
+# ----  confusion matrix and hitrate ----
+lambda_compare = opt_lambda # or set to opt_lambda from CV
 vhat=SVMMaj_manual(y,X,lambda_compare,v0,epsilon) # manual estimates
-pack_vhat=svmmaj(X,y,lambda = lambda_compare,hinge="quadratic",scale="none") # get coefficients for optimal beta
-print(cbind(vhat,pack_vhat$beta)) # compare our solution to package
-print(mean(abs(vhat-pack_vhat$beta))) # mean absolute deviation of the estimates
-plot(vhat,pack_vhat$beta)
-abline(a=0,b=1,col='red') # 45 degree line
-# --> estimates the same, constant seems off?
+q = X%*%vhat
+ypred = 1*(q>0) -1*(q<0)
+table(y,ypred)
+hitrate = mean(ypred==y)
+
+# ---- density plot ----
+qlim = c(min(q),max(q))
+cols = c(rgb(1,0,0,0.5),rgb(0,0,1,0.5))
+pdf('densityplot.pdf')
+hist(q[y==-1],breaks = 50, col =cols[1],
+     main="Density plot",
+     sub= paste("hitrate = ",hitrate,', lambda =',round(lambda_compare,3)),
+     xlim=qlim,xlab='q')
+hist(q[y==1],breaks = 30, col =cols[2],add=T)
+legend('topright',legend = c('y = -1','y = 1'),
+       col = cols, lty=1)
+box()
+dev.off()
+
+
+# ---- Compare with package for a fixed value of lambda ----
+pack_vhat=svmmaj(X[,-1],y,lambda = lambda_compare,hinge="quadratic",scale="none") # get coefficients for optimal beta
+print(cbind(vhat[-1],pack_vhat$beta)) # compare our solution to package
+print(mean(abs(vhat[-1]-pack_vhat$beta))) # mean absolute deviation of the estimates
+sum(ypred!=((pack_vhat$q>0)-(pack_vhat$q<0))) # predictions are the same
+
+
+# summary(pack_vhat)
+
+
+
+
+
