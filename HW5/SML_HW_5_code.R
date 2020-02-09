@@ -34,6 +34,8 @@ actorsplit <-strsplit(df_imdb$actors," \\| ")
 df_actorsplit <- (matrix(unlist(actorsplit), ncol=3, byrow=TRUE,))
 colnames(df_actorssplit) <- c("actor_1","actor_2","actor_3")
 rbind(df_imdb,df_actorsplit)
+test <- (unlist(actorsplit))
+length(actorsplit)
 dim(df_actorsplit)
 dim(df_imdb)
 summary(df_actorsplit)
@@ -83,7 +85,7 @@ gini_index <- function(y_sorted){
   return(gini_index)
 }
 
-optimal_split_cont <- function(data_left,cont_var,gini_parent){
+optimal_split_cont_gini_change <- function(data_left,cont_var,gini_parent){
   
   # Finding split points
   n_obs_to_split <- length(cont_var)
@@ -112,14 +114,45 @@ optimal_split_cont <- function(data_left,cont_var,gini_parent){
   #Select best split
   m_results <- cbind(split_candidates,wh_gini_change)
   m_results <- m_results[order(m_results[,2]),] #Sort matrix with small to high by gini change
-  best_split <- m_results[,dim(m_results)[2]] 
+  best_split <- m_results[,dim(m_results)[2]]  # return split value and wh gini change
   
   return(best_split)
 
 }
 
+split_binary_gini_change <- function(data_to_sort,binary_var,gini_parent){
+  n_obs_to_split <- length(binary_var)
+  v_splitoutcomes <- (binary_var > 0.5) 
+  bucket_1 <- data_to_sort[v_splitoutcomes,]
+  bucket_0 <- data_to_sort[-v_splitoutcomes,]
+  fraction_1 <- (length(bucket_1)/n_obs_to_split)
+  fraction_0 <-(length(bucket_0)/n_obs_to_split)
+  gini_1 <- gini_index(bucket_1[,34]) #obs sensitive to col n of outcome
+  gini_0 <- gini_index(bucket_0[,34])#obs sensitive to col n of outcome
+  wh_gini_change <- gini_parent - fraction_1*gini_1 - fraction_0*gini_0
+  return(wh_gini_change)
+}
+
+super_splitter <- function(data_to_sort,variable_to_split,splitvalue){
+
+  if(mean(variable_to_split)>0.5){ #need better choice condition
+    v_splitoutcomes <- (variable_to_split > splitvalue) 
+    node_1 <- data_to_sort[v_splitoutcomes,]
+    node_2 <- data_to_sort[-v_splitoutcomes,]
+     
+  }
+  else{
+    v_splitoutcomes <- (variable_to_split > 0.5) 
+    node_1 <- data_to_sort[v_splitoutcomes,]
+    node_2 <- data_to_sort[-v_splitoutcomes,]
+  }
+
+  return()
+  ## !!! not done - what to return
+}
+
 # Not done
-tree_grower <- function(data_to_sort,min_obs,max_depth){
+tree_grower <- function(y,data_to_sort,min_obs,max_depth){
   
   data_to_sort <- data_to_sort
   k <- 0
@@ -127,16 +160,39 @@ tree_grower <- function(data_to_sort,min_obs,max_depth){
     k <- k+1
     1 <- no_of_splits
     no_nodes <- no_of_splits*2
+    var_left_to_split <- dim(data_to_sort)[2]
+    improve_of_var_left <- rep(NA,var_left_to_split,2)
+    gini_parent <- gini_index(y) 
     
     for(i in 1:no_nodes){ #for all nodes in current level k
-      if(length(data_to_sort) => min_obs){
-       #!!! compare all possible variables to split here and select best?
+      
+      if(length(data_to_sort) => min_obs){ #as long as enough obs left to sort
+        
+        
+        
+        for(i in 1:var_left_to_split){ #consider all possible variables to split (??)
+          improve_of_var_left[i,1] <- i
+          if(mean(data_to_sort[,i]) > 1){ 
+            improve_of_var_left[i,2] <- optimal_split_cont_gini_change(data_to_sort,data_to_sort[,i],gini_parent)[2] 
+            #store gini wh change of var
+          }
+          else{ #assuimg rest variables binary
+            improve_of_var_left[i,2] <- split_binary_gini_change(data_to_sort,data_to_sort[,i],gini_parent)
+            
+          }
+          #Eval which is the best var to split on 
+          improve_of_var_left <- improve_of_var_left[order(improve_of_var_left[,2]),]
+          select_to_split <- improve_of_var_left[1,var_left_to_split])
+          print("Best var to choose is",improve_of_var_left[,var_left_to_split])
+                  }
+        
+        
        # Execute best possible split by the splitting function
        # update node description, node assig vector and split table
-         
+
       }
       else{ #move to next node
-        data_to_sort <- 
+        
         
       }
        
