@@ -7,25 +7,50 @@ output:
       fig_caption: yes
   html_notebook: default
 ---
+
 # Introduction
+Is it possible to before its screening predict whether a movie will be a blockbuster? Movie producers face the issue of how to optimally plan a movies market rollout, as well as assess the prospects of their future outcome.
+
 
 # Data
 - exclude actors and directos. Too many categories. We capture the predictive power by including cast facebook likes.
 - exlcude `gross_2015 budget, gross, budgeT_2015` because of missings
+- create outcome variable: TRUE/FALSE if  gross_2015 is 3*budget_2015, then remove gross_2015 
 - Select movies only budget 2015 at least 1m
 - prediction should only rely on factors observed before screening, so we also cannot use the post screening variables: imdb_score, gross, user_reviews critic_reviews.
 - use measures corrected for inflation (\_2015) for budget and gross
 - use length of title
 - genres are not mutually exclusive, so keep dummy for each genre as it is in the original dataset.
-- exclude missing budget
-- exlude further 7 observations with missing MPAA rating
-
+- drop year bc not very informative for prediction
+- fb likes director and actors some 0 values - prob not having (included in package results- package can handle?)
+- mpa rating - some unrated, "not rated", passed, some "X" - we don't know meaning - (included in package results - package can handle?) - for now not ordered for package bc of missing info about these var - set mtry to no of predictors so all variables are considered, 
+- unbalanced data - very roughly around 1/5 of obs manage to reach gross goal 
+- more movies with low budget than high budget
 
 # Method
+In order to assess the financial success of a proposed movie we adopt a classification tree and bagging approach respectively.
+
+- run package ´rpart':
+  - cp = 0.004 as in slides
+
+- run package "randomForest":
+- plot of out of bag error and number of bags/trees ---> tradeoff computations and error - we choose XXX no of trees for low error and fast computation
+
+
+
 
 # Results
 
+
+
 # Conclusion
+
+discussion
+- observations used are already selected - already produced - 
+
+future research:
+- balanced outcome set / predict successful movies
+
 
 # Code
 ```{r ref.label=knitr::all_labels(), echo = T, eval = F}
