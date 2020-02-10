@@ -1,0 +1,30 @@
+---
+title: "Supervised Machine Learning HW 5"
+author: "Group 3: Maja Nordfeldt, Jakob Rauch, Timo Schenk, Konstantin Sommer"
+date: "25-1-2020"
+output:
+  pdf_document:
+      fig_caption: yes
+  html_notebook: default
+---
+# Introduction
+
+# Data
+- exclude actors and directos. Too many categories. We capture the predictive power by including cast facebook likes.
+- exlcude `gross_2015 budget, gross, budgeT_2015` because of missings
+- Select movies only budget 2015 at least 1m
+- prediction should only rely on factors observed before screening, so we also cannot use the post screening variables: imdb_score, gross, user_reviews critic_reviews.
+- use measures corrected for inflation (\_2015) for budget and gross
+- use length of title
+- genres are not mutually exclusive, so keep dummy for each genre as it is in the original dataset.
+
+
+# Method
+
+# Results
+
+# Conclusion
+
+# Code
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```

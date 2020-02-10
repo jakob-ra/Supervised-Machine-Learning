@@ -11,43 +11,33 @@ if (!require("partykit")) install.packages("partykit")
 #if (!require("kernlab")) install.packages("kernlab")
 
 # -------------------------- Data Preparation --------------------#
-data_url <- "github.com/jakob-ra/Supervised-Machine-Learning/blob/master/HW5/imdb.RData"
-load((data_url))
+#data_url <- "https://github.com/jakob-ra/Supervised-Machine-Learning/blob/master/HW5/imdb.RData"
+load('imdb.RData')
 #!!!! why / how set wd to git? to load data work
 
 # Orig dataset
 colnames(imdb)
 sapply(imdb,class) # Checking classes of predictors
-summary(is.na(df_imdb)) #NA's - quite many in gross_2015 budget, gross, budgeT_2015
+summary(is.na(imdb)) #NA's - quite many in gross_2015 budget, gross, budgeT_2015
 
 # Selecting relevant subset
 df_imdb <- imdb[!is.na(imdb$budget_2015),]
 df_imdb <- df_imdb[!is.na(df_imdb$gross_2015),] # Remove obs with missing values
 df_imdb <- df_imdb[(df_imdb[,15]>=1000000),]# Select movies only budget at least 1m
 
-# Predict after production pre screening = drop post screening variables: imdb_score, gross, mpaa_rating, user_reviews critic_reviews, 
-df_imdb <- df_imdb[,-c(7,8,9,11,13)]
-# Assuming - no critcs viewed it, no users viewed it before, assuming actors credited will be known - ie on poster, 
-
-# Making top actors separate variables
-actorsplit <-strsplit(df_imdb$actors," \\| ")
-df_actorsplit <- (matrix(unlist(actorsplit), ncol=3, byrow=TRUE,))
-colnames(df_actorssplit) <- c("actor_1","actor_2","actor_3")
-rbind(df_imdb,df_actorsplit)
-test <- (unlist(actorsplit))
-length(actorsplit)
-dim(df_actorsplit)
-dim(df_imdb)
-summary(df_actorsplit)
-# !!!! why unlist removes one obs? need to take each eleement of list and turn into row
-
 # Make use of title: title length
 df_imdb$title_length <- as.numeric(nchar(as.character(df_imdb$title)))
-# Dummies for boolean var
-df_imdb[,11:31] <- sapply(df_imdb[,11:31],as.numeric) 
+titles = df_imdb$title
 
-X <- model.matrix( ~ factor(director) + factor(actor_1) + factor(actor_2) + factor(actor_3) + director_facebook_likes + cast_facebook_likes + budget_2015 + Drama + Comedy + Thriller + Action + Romance + Adventure + Crime + Fantasy + SciFi + Horror + Family +Mystery + Animation + Biography + Music + Sport + War + Musical + History + Documentary + Western + title_legth, data=df_imdb) # Including intercept, dropping one dummy for reference
+# drop post screen variables
+dropvars = c('imdb_score','gross','budget','user_reviews','critic_reviews','director','actors','title')
+dropind = colnames(df_imdb)%in%dropvars
+df_imdb <- df_imdb[,!dropind]# Select movies only budget at least 1m
 
+# create factor out of genre dummies
+
+
+# outcome
 df_imdb$gross_x3 <- as.factor(df_imdb$gross_2015 >= (df_imdb$budget_2015)*3) # 1 = movies gross box office takings of at least three times its budget 
 
 
