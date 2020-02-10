@@ -20,6 +20,7 @@ We exclude the names of the participating actors due to the otherwise extensive 
 A first inspection of the data shows that their are missing values in some of the observations, which we will drop in our manual estimation. Another important feature of the data is its unbalanced ness. Looking at FIGURE XYZ in which we plot the movie budget versus the movie success one can see that there is a large amount of movies that do not make the threshold and only very few (about one fifth) that are categorized as successful. One can also see that there is only a few very expensive movies while most movies are in the bottom of the budget range.
 
 ###DO THE PLOT HERE AUB
+### Leave gross_2015 saved as separate variable to get mean for table
 
 ```{r,echo=F, message=F, tab.lp="tab:1"}
 library(pander) 
