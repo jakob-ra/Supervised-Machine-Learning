@@ -4,24 +4,44 @@
 
 # -------------------------- Packages ---------------------------#
 
-#if (!require("tidyverse")) install.packages("tidyverse")
-if (!require("rpart")) install.packages("rpart")
-if (!require("rpart.plot")) install.packages("rpart.plot")
-if (!require("partykit")) install.packages("partykit")
-#if (!require("kernlab")) install.packages("kernlab")
+rm(list = ls())
+library(multcomp)
+library(party)
+library(dplyr)
+library(mvtnorm)
+library(libcoin)
+library(partykit)
+library("tidyverse")
+library("caret")
+library("kernlab")
+library("randomForest")
+library("ranger")
+library("rpart")
+library("rpart.plot")
+
+# install.packages("multcomp")
+# install.packages("party")
+# install.packages('mvtnorm', dep = TRUE)
+# install.packages("tidyverse", dep = TRUE)
+# install.packages("rpart", dep = TRUE)
+# install.packages("rpart.plot", dep = TRUE)
+# install.packages("partykit", dep = TRUE)
+# install.packages("kernlab", dep = TRUE)
 
 # -------------------------- Data Preparation --------------------#
-#data_url <- "https://github.com/jakob-ra/Supervised-Machine-Learning/blob/master/HW5/imdb.RData"
-load('imdb.RData')
+
+githubURL = "https://github.com/jakob-ra/Supervised-Machine-Learning/raw/master/HW5/imdb.RData"
+load(url(githubURL))
 #!!!! why / how set wd to git? to load data work
 
 # Orig dataset
 colnames(imdb)
 sapply(imdb,class) # Checking classes of predictors
-summary(is.na(imdb)) #NA's - quite many in gross_2015 budget, gross, budgeT_2015
+
 
 # Selecting relevant subset
-df_imdb <- imdb[!is.na(imdb$budget_2015),]
+df_imdb <- imdb[!is.na(imdb$budget_2015),] # drop missing budget
+df_imdb <- df_imdb[!is.na(df_imdb$mpaa_rating),] # drop missing MPAA
 df_imdb <- df_imdb[!is.na(df_imdb$gross_2015),] # Remove obs with missing values
 df_imdb <- df_imdb[(df_imdb[,15]>=1000000),]# Select movies only budget at least 1m
 
@@ -30,9 +50,9 @@ df_imdb$title_length <- as.numeric(nchar(as.character(df_imdb$title)))
 titles = df_imdb$title
 
 # drop post screen variables
-dropvars = c('imdb_score','gross','budget','user_reviews','critic_reviews','director','actors','title')
+dropvars = c('imdb_score','gross', 'budget','user_reviews','critic_reviews','director','actors','title','year')
 dropind = colnames(df_imdb)%in%dropvars
-df_imdb <- df_imdb[,!dropind]# Select movies only budget at least 1m
+df_imdb <- df_imdb[,!dropind] # dropping
 
 # create factor out of genre dummies
 
@@ -40,28 +60,53 @@ df_imdb <- df_imdb[,!dropind]# Select movies only budget at least 1m
 # outcome
 df_imdb$gross_x3 <- as.factor(df_imdb$gross_2015 >= (df_imdb$budget_2015)*3) # 1 = movies gross box office takings of at least three times its budget 
 
+# Plot budget vs revenue, line with slope 3
+plot(df_imdb$budget_2015,df_imdb$gross_2015)
+abline(a=0,b=3)
 
+plot(log(df_imdb$budget_2015),log(df_imdb$gross_2015))
+abline(a=log(3),b=0)
+
+df_imdb = subset(df_imdb, select = -gross_2015) # drop gross asa  predictor
+
+# Missing values
+summary(is.na(df_imdb))
+
+# Analyse data imbalance
+summary(df_imdb$gross_x3)
 
 # ------------------ Package results for reference --------------------#
-setseed(1234)
-test <- rpart(gross_x3 ~ director_facebook_likes + cast_facebook_likes + budget_2015 + Drama + Comedy + Thriller + Action + Romance + Adventure + Crime + Fantasy + SciFi + Horror + Family +Mystery + Animation + Biography + Music + Sport + War + Musical + History + Documentary + Western + title_legth, control = rpart.control(minsplit =10, minbucket = 5,xval=5,cp = 0.004,maxdepth = 10), data=df_imdb, method="class")
-# !!!! Only use subset?
+# Single tree
+set.seed(1)
+tree = rpart(gross_x3 ~ . - gross_x3, control = rpart.control(minsplit =5, minbucket = 5,xval=5,cp = 0.004,maxdepth = 10), data=df_imdb, method="class")
+pred = predict(tree, type="class")
+table(pred, df_imdb$gross_x3)
+
+printcp(tree) #display cp table
+plotcp(tree)# 	plot cross-validation results
+rsq.rpart(tree)	# plot approximate R-squared and relative error for different splits (2 plots). labels are only appropriate for the "anova" method.
+summary(tree)#	detailed results including surrogate splits
+
+plot(tree)#	plot decision tree
+text(tree)	#label the decision tree plot
+post(tree, file=)#	create postscript plot of decision tree
+
+# importance(tree)# !!!! Only use subset?
 # !!!! specify again with all predictors included
 # !!!! How to choose crossval?
+
+set.seed(1)
+bag = randomForest(gross_x3 ~ . - gross_x3, data = df_imdb, mtry = length(df_imdb)-1, ntree = 500)
+bag
+plot(bag, lwd = 2)
+varImpPlot(bag)
+
+# Which MPAA ratings exist? 
+unique(df_imdb$mpaa_rating)
 
 plot(as.party(test))
 test$splits
 prp(test)
-
-printcp(test) #display cp table
-plotcp(test)# 	plot cross-validation results
-rsq.rpart(test)	# plot approximate R-squared and relative error for different splits (2 plots). labels are only appropriate for the "anova" method.
-print(test) #	print results
-summary(test)#	detailed results including surrogate splits
-plot(test)#	plot decision tree
-text(test)	#label the decision tree plot
-post(test, file=)#	create postscript plot of decision tre
-importance(test)
 
 # ------------------ Manual binary classification --------------------#
 # Write your own R-function for a binary classification tree using the Gini index, based only on numeric features. Use the algorithm and splitting as described in the slides.
