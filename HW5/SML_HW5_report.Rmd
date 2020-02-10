@@ -31,6 +31,7 @@ pander(c(' ' ='mean',Budget=round(mean(df_imdb$budget_2015)),Revenue=round(mean(
 
 ```
 In table \ref(tab:1) one can see the mean of our main variables of interest, excluding the genre dummies. One can see that the average movie budget is 51 million 2015-US dollar, the average facebook likes of the cast are 12 thousand and the avergae duration is 110 minutes, so 20 minutes more than the standard 90 minutes movie framework.
+
 # Method
 In order to assess the financial success of a proposed movie we adopt a classification tree and bagging approach respectively.
 
@@ -44,18 +45,33 @@ In order to assess the financial success of a proposed movie we adopt a classifi
 
 
 # Results
+Our binary classification results in a tree (See Figure **XXX**) with $5$ levels. The budget of a movie is chosen as the first optimal variable to split, an occurs repeatedly in the tree. Other splitted variables include the MPAA rating and genre Horror and Drama. One can interpet the final nodes purity by considering the share of TRUE and FALSE outcomes in each bucket. For example, given a budget over roughly $36 000 000$, the movie will likely not return three times its budget as seen in Node 3 & 4, and considering the number of observation in each node. We allowed the algorithm to produce up to ten levels, but it seems like $5$ levels where more optimal after pruning. The number of unique variables used for prediction is $5$. We set quite a low minimum allowed number of observations in leaves, and can see the smallest obtained in the tree is $6$.     
+
+Moving on to evaluating the predictions produced, we turn to the confusion matrices of the binary classification and the bagging. The binary classification confusion matrix is based on the hits of the in sample prediction. We are running the decission tree with the cross validated $\alpha=0.06$ and are gaining a prediction for every observation. These predictions are then classified as correct or incorrect and summarized in the confusion matrix, that therefore presents in sample prediction errors.
+This confusion matrix shows that while we are able to predict non-successful movies accurately, we can only predict slightly more than 10% of the successful movies right. This is most likely due to the lack of successful movies in the dataset.
+
+We are also using a bagging algorithm in order to further improve our prediction. Considering Plot **XXX**, we see how the error of the bagging is changing with the number of trees used. The black line shows the out-of-bag prediction over all, the green line the error of successes and the red for the non-successes. As one can see, our overall out of bag classification error decreases with a higher tree quantity. Not surprisingly, the successful movies show a larger error, but somewhat puzzling, increase with the number of trees. This increase is nevertheless outweight by the performance increase in the prediction of the unsuccessful movies.
+
+Moving on, Plot **XXX** shows the importance of different features for prediction, as indicated for their ability to decrease the mean gini index. We note among the most important variables are budget, facebook likes of cast and director, movie duration and title length.
+
+The resulting confusion matrix is in this case shows that we are able to improve our prediction of successful movies, but still only predicting only a bit more than 20% accurately. We slightly decrease our prediction of non-successful movies though. In this confusion matrix each observation classified as 0 or 1 based on the majority of the tree predictions and then evaluated compared to the actual success. It is therefore still in sample prediction and thus comparable to our first matrix.
+
+
+
+
+
 
 # Conclusion & Discussion
 
-In this study, we asked the question whether we could predict whether a produced movie would return three times its budget before the start of its screening. Using binary classification, as well as bagging we found that it is indeed possible. 
+In this study, we asked the question whether we could predict whether a produced movie would return three times its budget before the start of its screening. Using binary classification, as well as bagging we found that it is indeed possible, but with certain restrictions.
 
-XXX discussion of results XXXX
+We are able to quite accurately predict the non-succesful movies, but have a very minor success to identify the big wins, which is a big draw-back if we want to capitalize on knowledge about future successes. We futher learnt that for prediciton, budget, social media presence and movie duration are important for deciding whether the movie will be successful or not. 
 
 From a perspective of practice implementation the classification tree is intuitive and easy to interpret, which may be a benefit if to be used for convincing stakeholders and making collective decisions in an organization. We can further clearly follow the steps behind the outcome, more transparent than the “black-box” results of some other methods. Data preparation needed is also sparse - variable standardization is not needed, missing values are treated robustly and dummies are not necessarily required for categorical variables. One also does not need to perform feature selection as it is done implicitly, and interactions and non-linearity is handled. On the downside, the results may not be robust - minor changes to training data can alter tree and final predictions, and overfitting can be a serious problem. The usefulness of predictions in practice can therefore come into question and results are sensitive to the quality of data. 
 
 The bagged approach help reduce variance of the traditional classification tree, and out of bag estimates are easy to use for validation. Although we still have easily interpretable diagnostics like the Gini index, contrasting the classification tree we now lack the intuitive visual interpretation. We have not included an extremely large number of trees to spare computation, increasing it would however increase the likelihood of their errors to cancel out, although gains are likely small. Keeping all features for trees rather than randomly selecting some means we introduce more correlation between trees, and although we could obtain lower errors this way it may also lead to overfitting. 
 
-For future research, one might want to repeat the exercise with measures to compensate for the unbalanced dataset, eg with a balanced bootstrapping algorithm. Further, one could try with more formally optimized parameters (e.g. number of trees in the bagging or number of levels in classification tree). The data is also possibly biased, likely only applying to the time and place of the observations, why the analysis could be redone with a another (more) representative training sample. 
+For future research, one might want to repeat the exercise with measures to compensate for the unbalanced dataset, eg with a balanced bootstrapping algorithm, in order to better predict successful movies. Further, one could try with more formally optimized parameters (e.g. number of trees in the bagging or number of levels in classification tree). The data is also possibly biased, likely only applying to the time and place of the observations, why the analysis could be redone with a another (more) representative training sample. 
 
 
 
