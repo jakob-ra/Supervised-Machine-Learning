@@ -43,15 +43,20 @@ In order to assess the financial success of a proposed movie we adopt a classifi
 
 # Results
 
+# Conclusion & Discussion
+
+In this study, we asked the question whether we could predict whether a produced movie would return three times its budget before the start of its screening. Using binary classification, as well as bagging we found that it is indeed possible. 
+
+XXX discussion of results XXXX
+
+From a perspective of practice implementation the classification tree is intuitive and easy to interpret, which may be a benefit if to be used for convincing stakeholders and making collective decisions in an organization. We can further clearly follow the steps behind the outcome, more transparent than the “black-box” results of some other methods. Data preparation needed is also sparse - variable standardization is not needed, missing values are treated robustly and dummies are not necessarily required for categorical variables. One also does not need to perform feature selection as it is done implicitly, and interactions and non-linearity is handled. On the downside, the results may not be robust - minor changes to training data can alter tree and final predictions, and overfitting can be a serious problem. The usefulness of predictions in practice can therefore come into question and results are sensitive to the quality of data. 
+
+The bagged approach help reduce variance of the traditional classification tree, and out of bag estimates are easy to use for validation. Although we still have easily interpretable diagnostics like the Gini index, contrasting the classification tree we now lack the intuitive visual interpretation. We have not included an extremely large number of trees to spare computation, increasing it would however increase the likelihood of their errors to cancel out, although gains are likely small. Keeping all features for trees rather than randomly selecting some means we introduce more correlation between trees, and although we could obtain lower errors this way it may also lead to overfitting. 
+
+For future research, one might want to repeat the exercise with measures to compensate for the unbalanced dataset, eg with a balanced bootstrapping algorithm. Further, one could try with more formally optimized parameters (e.g. number of trees in the bagging or number of levels in classification tree). The data is also possibly biased, likely only applying to the time and place of the observations, why the analysis could be redone with a another (more) representative training sample. 
 
 
-# Conclusion
 
-discussion
-- observations used are already selected - already produced - 
-
-future research:
-- balanced outcome set / predict successful movies
 
 
 # Code
