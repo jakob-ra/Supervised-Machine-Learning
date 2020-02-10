@@ -9,24 +9,26 @@ output:
 ---
 
 # Introduction
-Is it possible to before its screening predict whether a movie will be a blockbuster? Movie producers face the issue of how to optimally plan a movies market rollout, as well as assess the prospects of their future outcome.
+Is it possible to before its screening predict whether a movie will be a blockbuster, only based on publicly available information? This question can be of high relevance for movie producers or producing companies that face the issue of how to optimally plan a movies market rollout, as well as assess the prospects of their future outcome. For example if one can predict that a movie is likely to be a huge sucess one might try to push it in more countries than only in the local one and might even increase marketing budgets in order to gain the full potential out of the success. Another stakeholder that might be interested are movie theaters that might base their scheduling (room size, screening times etc.) on it.
+We will analyze this question from a very neutral perspective, without even assessing the movie quality, but only the information that is publicly available before a movie start, which might also be the information that decission makers will base their decission on, especially if they are outside of the production itself (like movie theaters). 
 
 
 # Data
-- exclude actors and directos. Too many categories. We capture the predictive power by including cast facebook likes.
-- exlcude `gross_2015 budget, gross, budgeT_2015` because of missings
-- create outcome variable: TRUE/FALSE if  gross_2015 is 3*budget_2015, then remove gross_2015 
-- Select movies only budget 2015 at least 1m
-- prediction should only rely on factors observed before screening, so we also cannot use the post screening variables: imdb_score, gross, user_reviews critic_reviews.
-- use measures corrected for inflation (\_2015) for budget and gross
-- use length of title
-- genres are not mutually exclusive, so keep dummy for each genre as it is in the original dataset.
-- drop year bc not very informative for prediction
-- fb likes director and actors some 0 values - prob not having (included in package results- package can handle?)
-- mpa rating - some unrated, "not rated", passed, some "X" - we don't know meaning - (included in package results - package can handle?) - for now not ordered for package bc of missing info about these var - set mtry to no of predictors so all variables are considered, 
-- unbalanced data - very roughly around 1/5 of obs manage to reach gross goal 
-- more movies with low budget than high budget
+In order to answer our proposed question of how to predict a movie success we are using a sample out of data published by the Internet Movie Database (IMDb) that is publicly available for download. IMDb is an online database, in which users can not only view information about movies and acters/actresses but can also rank the movies.
+The available datasets comprises information on movie names, director and actors as well as on the used budget and the assigned genre of the movie. We define a movie as being successfull if it manages to gain more than three times in box gross revenue than the available budget in the movie production. Box gross revenue is the income a movie gains from movie theater screenings. For both measures we are using inflation corrected numbers in 2015 dollars and define $gross_{x3}$ to be TRUE if the movie was successfull acoording to our criterium.
+We exclude the names of the participating actors due to the otherwise extensive number of categorical variables but use the number of Facebook likes of the main actors as a proxy for the popularity of the cast and do the same for the director of the movie. We exlude reviews from critics and IMDb users, since they are likely to only be available after the start of the movie. We nevertheless include the MPAA rating that gives a recommondation on the age of the targeted audience that should be allowed to watch it since one can expect that this might have an influence on the success of a movie. The rating system is giving recommondations from suggested for the general audience to only suggested for people above the age of 17. We drop the year variable since it should be without interest for decission makers since they can not influence the timing of the movie release or put differently it is without interest to know if movies were especially succesfull in a certain year. We addtionally include 0 or 1 dummies for all genres, since movies can also fall into several of the categories. We also include the lenght of the title since one can assume that short titles might be catchier and therefore more succesfull. Finally we also inlcude the movie budget but exclude all movies with a budget below one million dollar.
+A first insepction of the data shows that their are missing values in some of the observations, which we will drop in our manual estimation. Another important feature of the data is its unbalancendness. Looking at FIGURE XYZ in which we plot the movie budget versus the movie success one can see that there is a large amount of movies that do not make the threshold and only very few (about one fifth) that are categorized as successful. One can also see that there is only a few very expensive movies while most movies are in the bottom of the budget range.
+###DO THE PLOT HERE AUB
 
+```{r,echo=F, message=F, tab.lp="tab:1"}
+library(pander) 
+pander(c(' ' ='mean',Budget=round(mean(df_imdb$budget_2015)),Revenue=round(mean(df_imdb$gross_2015)),
+         'Cast-FB-likes'=round(mean(df_imdb$cast_facebook_likes)),'Director-FB-likes'=round(mean(df_imdb$director_facebook_likes)),
+         Duration=round(mean(df_imdb$duration))),
+       caption = "Mean statistics of main variables")
+
+```
+In table \ref(tab:1) one can see the mean of our main variables of interest, excluding the genre dummies. One can see that the average movie budget is 51 million 2015-US dollar, the average facebook likes of the cast are 12 thousand and the avergae duration is 110 minutes, so 20 minutes more than the standard 90 minutes movie framework.
 # Method
 In order to assess the financial success of a proposed movie we adopt a classification tree and bagging approach respectively.
 
