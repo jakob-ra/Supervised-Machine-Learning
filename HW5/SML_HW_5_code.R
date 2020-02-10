@@ -10,16 +10,6 @@ library(partykit)
 library(randomForest)
 library("rpart")
 library("rpart.plot")
-library(xtable)
-
-# install.packages("multcomp")
-# install.packages("party")
-# install.packages('mvtnorm', dep = TRUE)
-# install.packages("tidyverse", dep = TRUE)
-# install.packages("rpart", dep = TRUE)
-# install.packages("rpart.plot", dep = TRUE)
-# install.packages("partykit", dep = TRUE)
-# install.packages("kernlab", dep = TRUE)
 
 # -------------------------- Data Preparation --------------------#
 
@@ -57,8 +47,11 @@ df_imdb$gross_x3 <- as.factor(df_imdb$gross_2015 >= (df_imdb$budget_2015)*3) # 1
 plot(df_imdb$budget_2015,df_imdb$gross_2015)
 abline(a=0,b=3)
 
-plot(log(df_imdb$budget_2015),log(df_imdb$gross_2015))
-abline(a=log(3),b=0)
+plot(log(df_imdb$budget_2015),log(df_imdb$gross_2015),
+     ylab = 'log gross',xlab='log budget')
+xgrid = seq(0.1,4e8,length.out = 1000)
+lines(log(xgrid),log(3*xgrid),col='red',lwd=2)
+legend('bottomright',legend = 'gross = 3*budget',col='red',lwd = 2)
 
 df_imdb = subset(df_imdb, select = -gross_2015) # drop gross asa  predictor
 
@@ -124,8 +117,8 @@ knitr::kable(bag$confusion)
 
 # plot(bag, lwd = 2)
 varImpPlot(bag)
-
-
+plot(bag,lwd=2,main = 'Classification error')
+legend('right',legend = c('Class 0','Class 1','overall'),col=c('red','green','black'),lty= c(2,3,1))
 
 # ------------------ Manual binary classification --------------------
 # Write your own R-function for a binary classification tree using the Gini index, based only on numeric features. Use the algorithm and splitting as described in the slides.
