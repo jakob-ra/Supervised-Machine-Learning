@@ -104,7 +104,7 @@ varImpPlot(bag)
 # Which MPAA ratings exist? 
 unique(df_imdb$mpaa_rating)
 
-plot(as.party(test))
+plot(as.party(tree))
 test$splits
 prp(test)
 
